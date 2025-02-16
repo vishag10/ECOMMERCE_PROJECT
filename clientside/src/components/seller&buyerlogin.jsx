@@ -3,12 +3,17 @@ import React, { useState, useRef } from 'react';
 import { motion, useTransform, useMotionValue } from 'framer-motion';
 import buyer from "../assets/Adobe Express - file (3).png"
 import { Link } from "react-router-dom";
+import apiPath from "./path/apipath";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from 'react-toastify';
 
 const Buyerlogin = () => {
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const imageRef = useRef(null);
     const mouseX = useMotionValue(0);
     const mouseY = useMotionValue(0);
+    const navigate = useNavigate();
 
     const x = useTransform(mouseX, [0, window.innerWidth], [-5, 5]);
     const y = useTransform(mouseY, [0, window.innerHeight], [-5, 5]);
@@ -24,8 +29,42 @@ const Buyerlogin = () => {
         }
     };
 
+    const [data, setData] = useState({ email: "", password: "" });
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await axios.post(`${apiPath()}/loginbuyerseller`, data);
+            if (res.status === 200) {
+                const { token, msg } = res.data;
+                if (token) {
+                    console.log("Token received:", token);
+                    localStorage.setItem("token", token);
+                    toast.success(msg, {
+                        position: "top-right",
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "dark",
+                    });
+                    setData({ email: "", password: "" });
+                    setTimeout(() => navigate("/"), 3000);
+                }
+            } else {
+                alert("Login failed. Please try again.");
+            }
+        } catch (error) {
+            if (error.response) {
+                alert(error.response.data.msg);
+            }
+        }
+    };
+
     return (
         <div className="min-h-screen w-full flex items-center justify-center bg-gray-50 p-4">
+            <ToastContainer />
             <div className="w-full max-w-6xl flex flex-col md:flex-row rounded-xl shadow-lg bg-white overflow-hidden">
 
                 <motion.div
@@ -109,7 +148,7 @@ const Buyerlogin = () => {
                             <p className="text-gray-600 text-sm">Shop smarter, save bigger—log in now for the best deals!</p>
                         </div>
 
-                        <form className="space-y-6">
+                        <form className="space-y-6" onSubmit={handleSubmit}>
                             <motion.div
                                 whileHover={{ scale: 1.02 }}
                                 transition={{ type: "spring", stiffness: 400 }}
@@ -119,6 +158,8 @@ const Buyerlogin = () => {
                                     type="email"
                                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                                     placeholder="mail@example.com"
+                                    name="email" onChange={(e) => setData((prev) => ({ ...prev, [e.target.name]: e.target.value }))}
+                                    value={data.email}
                                 />
                             </motion.div>
 
@@ -130,11 +171,13 @@ const Buyerlogin = () => {
                                 <input
                                     type="password"
                                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                    name="password" onChange={(e) => setData((prev) => ({ ...prev, [e.target.name]: e.target.value }))}
+                                    value={data.password}
                                 />
                             </motion.div>
 
                             <div className="flex items-center justify-between">
-                                <Link to={"adminforgotpasssword"} className="text-sm text-purple-800 hover:text-purple-700">
+                                <Link to={""} className="text-sm text-purple-800 hover:text-purple-700">
                                     Forgot Password?
                                 </Link>
                             </div>

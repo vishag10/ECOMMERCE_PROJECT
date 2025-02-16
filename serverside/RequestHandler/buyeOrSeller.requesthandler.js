@@ -1,4 +1,4 @@
-import userSchema from "../models/user.model.js"
+import userSchema from "../models/buyerOrSeller.model.js"
 import bcrypt from "bcrypt"
 import jrk from "jsonwebtoken"
 import nodemailer from "nodemailer";
@@ -12,10 +12,10 @@ const transporter = nodemailer.createTransport({
     },
   });
 const {sign}=jrk
-export async function addUser(req,res){
-    const {username,email,password,cpassword}=req.body
+export async function addbuyer(req,res){
+    const {username,email,accounttype,phone,password,cpassword}=req.body
     console.log(username,email,password,cpassword);
-    if(!(username&&email&&password))
+    if(!(username&&email&&password&&accounttype&&phone))
         return res.status(404).send({msg:"fields are empty"})
     if(password!=cpassword)
         return res.status(404).send({msg:"password not match"})
@@ -28,7 +28,7 @@ export async function addUser(req,res){
     const hPassword=await bcrypt.hash(password,10)
     console.log(hPassword);
 
-    await userSchema.create({username,email,password:hPassword}).then(()=>{
+    await userSchema.create({username,email,password:hPassword,accounttype,phone}).then(()=>{
         res.status(201).send({msg:"successfully created"})
     }).catch((err)=>{
         res.status(500).send({msg:err})
@@ -38,7 +38,7 @@ export async function addUser(req,res){
     
 }   
 
-export async function loginUser(req,res){
+export async function loginbuyer(req,res){
     const {email,password} = req.body
     if(!(email&&password))
         return res.status(404).send({msg:"fields are empty"})
@@ -56,7 +56,7 @@ export async function loginUser(req,res){
 }
 
 
-export async function Home(req,res){
+export async function Homebuyer(req,res){
     try {
         console.log("end point");
         console.log(req.user);
@@ -79,7 +79,7 @@ export async function passwordRequest(req, res) {
             to: req.body.email, // list of receivers
             subject: "verify ✔", // Subject line
             text: "verify your email", // plain text body
-            html: "<a href='http://localhost:3000/pages/forgot.html'><button>verify</button></a>", // html body
+            html: "<a href='http://localhost:5173/Adminresetpassword'><button>verify</button></a>", // html body
           });
         
           console.log("Message sent: %s", info.messageId);
