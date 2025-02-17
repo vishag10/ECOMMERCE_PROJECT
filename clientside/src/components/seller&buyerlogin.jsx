@@ -8,7 +8,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from 'react-toastify';
 
-const Buyerlogin = () => {
+const Buyerlogin = ({ useremail, setEMAIL }) => {
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const imageRef = useRef(null);
     const mouseX = useMotionValue(0);
@@ -39,6 +39,9 @@ const Buyerlogin = () => {
                 if (token) {
                     console.log("Token received:", token);
                     localStorage.setItem("token", token);
+                    setEMAIL(data.email);
+                    console.log(useremail);
+                    
                     toast.success(msg, {
                         position: "top-right",
                         autoClose: 5000,
@@ -51,6 +54,7 @@ const Buyerlogin = () => {
                     });
                     setData({ email: "", password: "" });
                     setTimeout(() => navigate("/"), 3000);
+
                 }
             } else {
                 alert("Login failed. Please try again.");

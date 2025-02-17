@@ -11,6 +11,7 @@ router.route("/login").post(rh.loginUser);
 router.route("/loginbuyerseller").post(bh.loginbuyer);
 router.route("/home").get(Auth,rh.Home);
 router.route("/homebuyerseller").get(Auth,bh.Homebuyer);
+router.route("/getuser").post(bh.getUser);
 router.route("/forgot").post(rh.passwordRequest);
 router.route("/forgotbuyerseller").post(bh.passwordRequest);
 

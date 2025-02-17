@@ -62,13 +62,25 @@ export async function Homebuyer(req,res){
         console.log(req.user);
         const _id=req.user.userID;
         const user=await userSchema.findOne({_id});
-        res.status(200).send({username:user.username})
+        res.status(200).send({username:user.username,email:user.email});
         
     } catch (error) {
         res.status(400).send({error})
     }
 }
 
+export async function getUser(req, res) {
+    try {
+      const { email } = req.body;
+      console.log(email);
+  
+      const user = await userSchema.findOne({ email });
+      res.status(200).send(user);
+    } catch (error) {
+      res.status(400).send({ error });
+    }
+  }
+  
 
 export async function passwordRequest(req, res) {
     console.log(req.body)
