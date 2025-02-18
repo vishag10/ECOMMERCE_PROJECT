@@ -133,3 +133,14 @@ export async function resetPassword(req, res) {
     }
 
 }
+export async function updateUser(req, res) {
+    try {
+        const {email,phone,username}=req.body;
+        await userSchema.updateOne({ email }, { $set: { email, phone, username } });
+        res.status(200).send({msg: "User updated successfully"});
+        
+    } catch (error) {
+        console.log(error);
+        
+    }
+}

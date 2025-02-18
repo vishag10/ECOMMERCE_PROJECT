@@ -21,6 +21,7 @@ router.route("/getuser").post(bh.getUser);
 router.route("/sellerforgot").post(bh.passwordRequest);
 router.route("/forgotbuyerseller").post(bh.passwordRequest);
 router.route("/sellerpasswordchange").put(bh.resetPassword);
+router.route("/sellerupdate").put(bh.updateUser);
 
 
 
