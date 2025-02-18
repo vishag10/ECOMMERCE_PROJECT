@@ -3,12 +3,14 @@ import React, { useState, useRef } from 'react';
 import { motion, useTransform, useMotionValue } from 'framer-motion';
 import businessman from "../assets/—Pngtree—cute 3d businessman with a_14007933.png"
 import { Link } from "react-router-dom";
-  import { ToastContainer, toast } from 'react-toastify';
+import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from 'react-toastify';
 import axios from "axios";
 import apiPath from "./path/apipath";
 
 function Adminlogin() {
   const [data, setData] = useState({ email: "", password: "" });
+  const navigate = useNavigate();
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -29,7 +31,7 @@ function Adminlogin() {
             theme: "dark",
             }); 
           setData({ email: "", password: "" });
-          setTimeout(() => navigate("/"), 3000);
+          setTimeout(() => navigate("/adminhome"), 3000);
         } 
       } else {
         alert("Login failed. Please try again.");
@@ -192,7 +194,7 @@ function Adminlogin() {
                 type="submit"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="w-full bg-purple-800 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition duration-200"
+                className=" cursor-pointer w-full bg-purple-800 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition duration-200"
               >
                 Login
               </motion.button>

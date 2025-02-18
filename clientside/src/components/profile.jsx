@@ -151,7 +151,7 @@ function Profile({ useremail, setEMAIL }) {
               {dropdownOpen && (
                 <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg">
                   <button
-                    className=" cursor-pointer w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                    className=" cursor-pointer w-full text-left px-4 py-2 text-sm hover:bg-gray-200 rounded-lg"
                     onClick={handleLogout}
                   >
                     Logout

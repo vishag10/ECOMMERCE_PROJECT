@@ -116,7 +116,7 @@ const BuyerRegister = () => {
                             type="submit"
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            className={`w-full py-3 rounded-md text-white transition duration-200 ${termsAccepted ? "bg-purple-800 hover:bg-purple-700" : "bg-gray-400 cursor-not-allowed"}`}
+                            className={`cursor-pointer w-full py-3 rounded-md text-white transition duration-200 ${termsAccepted ? "bg-purple-800 hover:bg-purple-700" : "bg-gray-400 cursor-not-allowed"}`}
                             disabled={!termsAccepted}
                         >
                             Create Account

@@ -162,7 +162,7 @@ function BuyerForget() {
                 type="submit"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="w-full bg-purple-800 text-white text-base py-3 px-4 rounded-md hover:bg-purple-700 transition duration-200"
+                className="cursor-pointer w-full bg-purple-800 text-white text-base py-3 px-4 rounded-md hover:bg-purple-700 transition duration-200"
               >
                 Send
               </motion.button>

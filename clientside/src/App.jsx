@@ -13,6 +13,7 @@ import { createContext, useContext } from 'react';
 import Profile from './components/profile';
 import BuyerForget from './components/seller&buyerforgotpassword';
 import BuyerResetPassword from './components/seller&buyerResetpassword';
+import AdminHome from './components/adminFrontpage';
 
 const ThemeContext = createContext(null);
 
@@ -28,6 +29,8 @@ function App() {
     <Route path="/adminlogin" element={<Adminlogin/>} />
     <Route path="/adminlogin/adminforgotpasssword" element={<AdminForgot/>} />
     <Route path="/Adminresetpassword" element={<AdminResetPassword/>} />
+    <Route path="/adminhome" element={<AdminHome/>} />
+    
     //seller and buyer routes
     <Route path="/buyerorsellerlogin" element={<Buyerlogin useremail={useremail} setEMAIL={setEMAIL} />} />
     <Route path="/signup" element={<BuyerRegister/>} />

@@ -33,7 +33,7 @@ function BuyerResetPassword() {
                     theme: "dark",
                 });
                 setData({ email: "", password: "", cpassword: "" });
-                setTimeout(() => navigate("/adminlogin"), 3000);
+                setTimeout(() => navigate("/buyerorsellerlogin"), 3000);
             }
 
         } catch (error) {
@@ -188,7 +188,7 @@ function BuyerResetPassword() {
                                 type="submit"
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
-                                className="w-full bg-purple-800 text-white text-base py-3 px-4 rounded-md hover:bg-purple-700 transition duration-200"
+                                className="cursor-pointer w-full bg-purple-800 text-white text-base py-3 px-4 rounded-md hover:bg-purple-700 transition duration-200"
                             >
                                 Reset Password
                             </motion.button>
