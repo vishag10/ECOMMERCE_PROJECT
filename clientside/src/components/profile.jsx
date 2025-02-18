@@ -14,6 +14,44 @@ function Profile({ useremail, setEMAIL }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [profile, setProfile] = useState(null);
   const navigate = useNavigate();
+  const [updateuser, setupdateUser] = useState({ email: "", username: "", phone: "" });
+
+  const [isEditing, setIsEditing] = useState({
+    username: false,
+    email: false,
+    phone: false
+  });
+
+  const toggleEdit = (field) => {
+    setIsEditing((prev) => ({ ...prev, [field]: !prev[field] }));
+  };
+
+  const handleProfileChange = (e) => {
+    setProfile({ ...profile, [e.target.name]: e.target.value });
+  };
+
+  const handleUpdate = async () => {
+    try {
+      const res = await axios.put(`${apiPath()}/sellerupdate`, profile);
+      if (res.status === 200) {
+        const { msg } = res.data;
+        toast.success(msg, {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+        setTimeout(() => window.location.reload(), 3000);
+        // // Refresh the page after successful update
+        // window.location.reload();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const getUser = async () => {
     const token = localStorage.getItem("token");
@@ -66,22 +104,20 @@ function Profile({ useremail, setEMAIL }) {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("useremail");
-  
+
     toast.error("Logged out!", {
       position: "top-right",
-      autoClose: 3000, // Shorter duration
+      autoClose: 3000,
       hideProgressBar: false,
       closeOnClick: true,
       pauseOnHover: true,
       draggable: true,
       theme: "dark",
     });
-  
-    // setEMAIL("");
-    setUser({ email: "", username: "" });
-  
-    setTimeout(() => navigate("/buyerorsellerlogin"), 3000);
 
+    setUser({ email: "", username: "" });
+
+    setTimeout(() => navigate("/buyerorsellerlogin"), 3000);
   };
 
   const [activeSection, setActiveSection] = useState('profile');
@@ -90,12 +126,12 @@ function Profile({ useremail, setEMAIL }) {
     <>
       <nav className="flex items-center justify-between px-8 py-4 bg-white border-b">
         <ToastContainer />
-        {/* Logo */}
+        
         <div className="flex items-center">
           <img src={logo} className="w-18 h-16 mt-1.5" alt="Logo" />
         </div>
 
-        {/* Navigation Links */}
+       
         <div className="hidden lg:flex items-center space-x-8">
           <a href="#" className="text-sm font-medium hover:text-gray-600">
             New & Featured
@@ -117,9 +153,9 @@ function Profile({ useremail, setEMAIL }) {
           </a>
         </div>
 
-        {/* Right Section */}
+        
         <div className="flex items-center space-x-6 relative">
-          {/* Search Bar */}
+          
           <div className="hidden md:flex items-center bg-gray-100 rounded-full">
             <div className="flex items-center px-4 py-2">
               <Search className="w-4 h-4 text-gray-500" />
@@ -139,19 +175,19 @@ function Profile({ useremail, setEMAIL }) {
           {/* Profile Section */}
           {user.username ? (
             <div className="relative">
-              {/* Profile Circle */}
+              
               <button
-                className="w-10 h-10 flex items-center justify-center text-white font-semibold rounded-full bg-gray-800 hover:bg-gray-700 focus:outline-none"
+                className=" cursor-pointer w-10 h-10 flex items-center justify-center text-white font-semibold rounded-full bg-gray-800 hover:bg-gray-700 focus:outline-none"
                 onClick={() => setDropdownOpen(!dropdownOpen)}
               >
                 {user.username.charAt(0).toUpperCase()}
               </button>
 
-              {/* Dropdown Menu */}
+              
               {dropdownOpen && (
                 <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg">
                   <button
-                    className=" cursor-pointer w-full text-left px-4 py-2 text-sm hover:bg-gray-200 rounded-lg"
+                    className="cursor-pointer w-full text-left px-4 py-2 text-sm hover:bg-gray-200 rounded-lg"
                     onClick={handleLogout}
                   >
                     Logout
@@ -170,9 +206,10 @@ function Profile({ useremail, setEMAIL }) {
         </div>
       </nav>
       <div className="flex gap-6 p-6 bg-gray-50 min-h-screen">
-        {/* Left Sidebar */}
+        
         <div className="w-64">
-          {/* Profile Header */}
+           
+
           <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center">
@@ -180,16 +217,15 @@ function Profile({ useremail, setEMAIL }) {
               </div>
               <div>
                 <div className="text-sm text-gray-500">
-                  Hello, {profile ? profile.username : "Loading..."} {/* Conditional rendering */}
+                  Hello, {profile ? profile.username : "Loading..."}
                 </div>
                 <div className="font-medium"></div>
               </div>
             </div>
           </div>
 
-          {/* Navigation Menu */}
+          
           <div className="bg-white rounded-lg shadow-sm">
-            
             <div>
               <div className="flex items-center gap-2 p-4">
                 <UserCog className="w-5 h-5 text-blue-500" />
@@ -217,49 +253,79 @@ function Profile({ useremail, setEMAIL }) {
         <div className="flex-1 bg-white rounded-lg shadow-sm p-6">
           {activeSection === 'profile' ? (
             <>
-              {profile ? ( // Conditional rendering for profile data
+              {profile ? (
                 <>
                   <div className="mb-6">
                     <div className="flex justify-between items-center mb-4">
                       <h2 className="text-lg font-medium">Personal Information</h2>
-                      <button className="text-blue-500">Edit</button>
+                      <button
+                        className="cursor-pointer text-blue-500"
+                        onClick={() => {
+                          toggleEdit("username");
+                          if (isEditing.username) handleUpdate();
+                        }}
+                      >
+                        {isEditing.username ? "Save" : "Edit"}
+                      </button>
                     </div>
                     <input
                       type="text"
+                      name="username"
                       value={profile.username}
+                      onChange={handleProfileChange}
                       className="w-full p-2 border rounded-md bg-gray-50"
-                      readOnly
+                      readOnly={!isEditing.username}
                     />
                   </div>
 
                   <div className="mb-6">
                     <div className="flex justify-between items-center mb-4">
                       <h2 className="text-lg font-medium">Email Address</h2>
-                      <button className="text-blue-500">Edit</button>
+                      <button
+                        className="cursor-pointer text-blue-500"
+                        onClick={() => {
+                          toggleEdit("email");
+                          if (isEditing.email) handleUpdate();
+                        }}
+                      >
+                        {isEditing.email ? "Save" : "Edit"}
+                      </button>
                     </div>
                     <input
                       type="email"
+                      name="email"
                       value={profile.email}
+                      onChange={handleProfileChange}
                       className="w-full p-2 border rounded-md bg-gray-50"
-                      readOnly
+                      readOnly={!isEditing.email}
                     />
                   </div>
 
                   <div>
                     <div className="flex justify-between items-center mb-4">
                       <h2 className="text-lg font-medium">Mobile Number</h2>
-                      <button className="text-blue-500">Edit</button>
+                      <button
+                        className="cursor-pointer text-blue-500"
+                        onClick={() => {
+                          toggleEdit("phone");
+                          if (isEditing.phone) handleUpdate();
+                        }}
+                      >
+                        {isEditing.phone ? "Save" : "Edit"}
+                      </button>
                     </div>
                     <input
                       type="tel"
+                      name="phone"
                       value={profile.phone}
+                      onChange={handleProfileChange}
                       className="w-full p-2 border rounded-md bg-gray-50"
-                      readOnly
+                      readOnly={!isEditing.phone}
                     />
                   </div>
                 </>
               ) : (
-                <div>Loading profile data...</div> // Fallback UI while profile is being fetched
+                <div>Loading profile data...</div>
               )}
             </>
           ) : (
