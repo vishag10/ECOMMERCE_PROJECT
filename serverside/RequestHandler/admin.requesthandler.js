@@ -3,12 +3,12 @@ import bcrypt from "bcrypt"
 import jrk from "jsonwebtoken"
 import nodemailer from "nodemailer";
 const transporter = nodemailer.createTransport({
-    host: "sandbox.smtp.mailtrap.io",
-    port: 2525,
+    host: "smtp.gmail.com",
+    port: 587 ,
     secure: false, // true for port 465, false for other ports
     auth: {
-      user: "cbe9707214b09e",
-      pass: "19237d1b3de970",
+      user: "vishagchandran77@gmail.com",
+      pass: "redrythljkieozqf",
     },
   });
 const {sign}=jrk
@@ -74,8 +74,9 @@ export async function passwordRequest(req, res) {
     console.log(req.body)
 
     try {
+        
         const info = await transporter.sendMail({
-            from: 'deyab87446@owube.com', // sender address
+            from: 'vishagchandran77@gmail.com', // sender address
             to: req.body.email, // list of receivers
             subject: "verify ✔", // Subject line
             text: "verify your email", // plain text body
@@ -88,6 +89,31 @@ export async function passwordRequest(req, res) {
 
     } catch (error) {
         res.status(500).send(error)
+    }
+
+}
+
+export async function resetPassword(req, res) {
+    try {
+        console.log(req.body)
+    const { email, password, cpassword } = req.body;
+    if(!email&&!password&&!cpassword){
+        return res.status(404).send({msg: "fields are empty"})
+    }
+    const user = await userSchema.findOne({ email });
+    if (!user) {
+        return res.status(404).send({ msg: "User not found" });
+    }
+    if (password!== cpassword) {
+        return res.status(404).send({ msg: "Passwords do not match" });
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await userSchema.updateOne({ email }, { password: hashedPassword });
+    res.status(200).send({ msg: "Password has been reset successfully" });
+
+    } catch (error) {
+        console.log(error);
+        
     }
 
 }

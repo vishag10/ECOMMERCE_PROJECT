@@ -120,10 +120,10 @@ function Home({ useremail, setEMAIL }) {
 
           {/* Profile Section */}
           {user.username ? (
-            <div className="relative">
+            <div className="relative ">
               {/* Profile Circle */}
               <button
-                className="w-10 h-10 flex items-center justify-center text-white font-semibold rounded-full bg-gray-800 hover:bg-gray-700 focus:outline-none"
+                className="  cursor-pointer w-10 h-10 flex items-center justify-center text-white font-semibold rounded-full bg-gray-800 hover:bg-gray-700 focus:outline-none"
                 onClick={() => setDropdownOpen(!dropdownOpen)}
               >
                 {user.username.charAt(0).toUpperCase()}

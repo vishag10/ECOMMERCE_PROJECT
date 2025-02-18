@@ -11,6 +11,8 @@ import Home from './components/home';
 import BuyerRegister from './components/seller&buyerregister';
 import { createContext, useContext } from 'react';
 import Profile from './components/profile';
+import BuyerForget from './components/seller&buyerforgotpassword';
+import BuyerResetPassword from './components/seller&buyerResetpassword';
 
 const ThemeContext = createContext(null);
 
@@ -20,13 +22,18 @@ function App() {
     <ThemeContext.Provider value={{useremail, setEMAIL}}>
     <BrowserRouter>
      <Routes>
+      //home
     <Route path="/" element={<Home useremail={useremail} setEMAIL={setEMAIL} />} />
+    //admin routes
     <Route path="/adminlogin" element={<Adminlogin/>} />
     <Route path="/adminlogin/adminforgotpasssword" element={<AdminForgot/>} />
     <Route path="/Adminresetpassword" element={<AdminResetPassword/>} />
+    //seller and buyer routes
     <Route path="/buyerorsellerlogin" element={<Buyerlogin useremail={useremail} setEMAIL={setEMAIL} />} />
     <Route path="/signup" element={<BuyerRegister/>} />
     <Route path="/profile" element={<Profile/>} />
+    <Route path="/sellerforgot" element={<BuyerForget/>} />
+    <Route path="/buyerresetpassword" element={<BuyerResetPassword/>} />
      </Routes>
   </BrowserRouter>
   </ThemeContext.Provider>

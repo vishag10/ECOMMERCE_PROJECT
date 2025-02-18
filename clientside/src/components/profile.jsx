@@ -189,11 +189,7 @@ function Profile({ useremail, setEMAIL }) {
 
           {/* Navigation Menu */}
           <div className="bg-white rounded-lg shadow-sm">
-            <div className="flex items-center gap-2 p-4 border-b">
-              <Box className="w-5 h-5 text-blue-500" />
-              <span className="text-gray-600">MY ORDERS</span>
-            </div>
-
+            
             <div>
               <div className="flex items-center gap-2 p-4">
                 <UserCog className="w-5 h-5 text-blue-500" />

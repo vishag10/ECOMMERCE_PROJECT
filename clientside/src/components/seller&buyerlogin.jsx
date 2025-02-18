@@ -181,7 +181,7 @@ const Buyerlogin = ({ useremail, setEMAIL }) => {
                             </motion.div>
 
                             <div className="flex items-center justify-between">
-                                <Link to={""} className="text-sm text-purple-800 hover:text-purple-700">
+                                <Link to={"/sellerforgot"} className="text-sm text-purple-800 hover:text-purple-700">
                                     Forgot Password?
                                 </Link>
                             </div>

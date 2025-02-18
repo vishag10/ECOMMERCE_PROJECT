@@ -3,12 +3,45 @@ import React, { useState, useRef } from 'react';
 import { motion, useTransform, useMotionValue } from 'framer-motion';
 import businessman from "../assets/—Pngtree—cute 3d businessman with a_14007933.png"
 import { Link } from "react-router-dom";
+import { ToastContainer, toast } from 'react-toastify';
+import axios from "axios";
+import apiPath from "./path/apipath";
+import { useNavigate } from "react-router-dom";
 
 function AdminResetPassword() {
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const imageRef = useRef(null);
     const mouseX = useMotionValue(0);
     const mouseY = useMotionValue(0);
+    const navigate = useNavigate();
+    const [data, setData] = useState({ email: "", password: "", cpassword: "" });
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await axios.put(`${apiPath()}/adminpasswordchange`, data);
+            if (res.status === 200) {
+                const { msg } = res.data;
+                toast.success(msg, {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "dark",
+                });
+                setData({ email: "", password: "", cpassword: "" });
+                setTimeout(() => navigate("/adminlogin"), 3000);
+            }
+
+        } catch (error) {
+            if (error.response) {
+                alert(error.response.data.msg);
+            }
+        }
+    }
 
     // Parallax effect values
     const x = useTransform(mouseX, [0, window.innerWidth], [-5, 5]);
@@ -28,6 +61,7 @@ function AdminResetPassword() {
 
     return (
         <div className="min-h-screen w-full flex items-center justify-center bg-gray-50 p-6">
+            <ToastContainer />
             <div className="w-full max-w-6xl flex flex-col md:flex-row rounded-xl shadow-lg bg-white overflow-hidden">
                 {/* Left Side - Image */}
                 <motion.div
@@ -112,7 +146,19 @@ function AdminResetPassword() {
                             <p className="text-gray-600 text-sm">See what is going on with your business</p>
                         </div>
 
-                        <form className="space-y-6">
+                        <form className="space-y-6" onSubmit={handleSubmit}>
+                            <motion.div
+                                whileHover={{ scale: 1.02 }}
+                                transition={{ type: "spring", stiffness: 400 }}
+                            >
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                <input
+                                    type="text"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                    name="email" onChange={(e) => setData((prev) => ({ ...prev, [e.target.name]: e.target.value }))}
+                                    value={data.email}
+                                />
+                            </motion.div>
                             <motion.div
                                 whileHover={{ scale: 1.02 }}
                                 transition={{ type: "spring", stiffness: 400 }}
@@ -121,6 +167,8 @@ function AdminResetPassword() {
                                 <input
                                     type="password"
                                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                    name="password" onChange={(e) => setData((prev) => ({ ...prev, [e.target.name]: e.target.value }))}
+                                    value={data.password}
                                 />
                             </motion.div>
                             <motion.div
@@ -131,6 +179,8 @@ function AdminResetPassword() {
                                 <input
                                     type="password"
                                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                    name="cpassword" onChange={(e) => setData((prev) => ({ ...prev, [e.target.name]: e.target.value }))}
+                                    value={data.cpassword}
                                 />
                             </motion.div>
 
