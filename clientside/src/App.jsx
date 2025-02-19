@@ -15,6 +15,7 @@ import BuyerForget from './components/seller&buyerforgotpassword';
 import BuyerResetPassword from './components/seller&buyerResetpassword';
 import AdminHome from './components/adminFrontpage';
 import SellItem from './components/sellitem';
+import Address from './components/address';
 
 const ThemeContext = createContext(null);
 
@@ -39,6 +40,7 @@ function App() {
     <Route path="/sellerforgot" element={<BuyerForget/>} />
     <Route path="/buyerresetpassword" element={<BuyerResetPassword/>} />
     <Route path="/sellitem" element={<SellItem/>} />
+    <Route path="/address" element={<Address/>} />
      </Routes>
   </BrowserRouter>
   </ThemeContext.Provider>

@@ -2,6 +2,7 @@ import { Router } from "express";
 import * as rh from "./RequestHandler/admin.requesthandler.js"
 import * as bh from "./RequestHandler/buyeOrSeller.requesthandler.js"
 import * as ph from "./RequestHandler/product.requesthandler.js"
+import * as ah from "./RequestHandler/address.requesthandler.js"
 
 import Auth from "./middleware/auth.js";
 
@@ -26,6 +27,9 @@ router.route("/sellerupdate").put(bh.updateUser);
 
 //product
 router.route("/addproduct").post(ph.addProduct);
+
+//address
+router.route("/addaddress").post(ah.addAddress);
 
 
 

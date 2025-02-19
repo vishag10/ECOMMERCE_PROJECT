@@ -8,16 +8,16 @@ import apiPath from "./path/apipath";
 import { User as UserIcon, Box, UserCog, Plus } from 'lucide-react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { ChevronDown } from "lucide-react";
+import {  Trash } from "lucide-react";
 function Profile({ useremail, setEMAIL }) {
-  const [user, setUser] = useState({ email: "", username: "",accounttype: "",_id:"" });
+  const [user, setUser] = useState({ email: "", username: "", accounttype: "", _id: "" });
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [profile, setProfile] = useState(null);
   const navigate = useNavigate();
   const [updateuser, setupdateUser] = useState({ email: "", username: "", phone: "" });
 
 
-  
+
   const [isEditing, setIsEditing] = useState({
     username: false,
     email: false,
@@ -68,12 +68,12 @@ function Profile({ useremail, setEMAIL }) {
 
       if (res.status === 200) {
         console.log("User Data:", res.data);
-        setUser({ email: res.data.email, username: res.data.username,accounttype:res.data.accounttype,_id:res.data._id });
-        
-        
-        
-        
-        
+        setUser({ email: res.data.email, username: res.data.username, accounttype: res.data.accounttype, _id: res.data._id });
+
+
+
+
+
       }
     } catch (error) {
       console.error("Error:", error.response ? error.response.data : error);
@@ -84,7 +84,7 @@ function Profile({ useremail, setEMAIL }) {
     }
   };
   console.log(user);
-  
+
 
   const getProfile = async () => {
     if (!user.email) return;
@@ -135,12 +135,12 @@ function Profile({ useremail, setEMAIL }) {
     <>
       <nav className="flex items-center justify-between px-8 py-4 bg-white border-b">
         <ToastContainer />
-        
+
         <div className="flex items-center">
           <img src={logo} className="w-18 h-16 mt-1.5" alt="Logo" />
         </div>
 
-       
+
         <div className="hidden lg:flex items-center space-x-8">
           <a href="#" className="text-sm font-medium hover:text-gray-600">
             New & Featured
@@ -162,9 +162,9 @@ function Profile({ useremail, setEMAIL }) {
           </a>
         </div>
 
-        
+
         <div className="flex items-center space-x-6 relative">
-          
+
           <div className="hidden md:flex items-center bg-gray-100 rounded-full">
             <div className="flex items-center px-4 py-2">
               <Search className="w-4 h-4 text-gray-500" />
@@ -184,7 +184,7 @@ function Profile({ useremail, setEMAIL }) {
           {/* Profile Section */}
           {user.username ? (
             <div className="relative">
-              
+
               <button
                 className=" cursor-pointer w-10 h-10 flex items-center justify-center text-white font-semibold rounded-full bg-gray-800 hover:bg-gray-700 focus:outline-none"
                 onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -192,7 +192,7 @@ function Profile({ useremail, setEMAIL }) {
                 {user.username.charAt(0).toUpperCase()}
               </button>
 
-              
+
               {dropdownOpen && (
                 <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg">
                   <button
@@ -215,9 +215,9 @@ function Profile({ useremail, setEMAIL }) {
         </div>
       </nav>
       <div className="flex gap-6 p-6 bg-gray-50 min-h-screen">
-        
+
         <div className="w-64">
-           
+
 
           <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
             <div className="flex items-center gap-3">
@@ -233,7 +233,7 @@ function Profile({ useremail, setEMAIL }) {
             </div>
           </div>
 
-          
+
           <div className="bg-white rounded-lg shadow-sm">
             <div>
               <div className="flex items-center gap-2 p-4">
@@ -253,32 +253,32 @@ function Profile({ useremail, setEMAIL }) {
                 >
                   Manage Addresses
                 </div>
-                
+
               </div>
               {user.accounttype === "seller" ? (
-  <div className="flex flex-col items-center space-y-3">
-   <Link to={"/sellitem"} state={{ _id: user._id }}> <button className=" cursor-pointer w-40 px-4 py-2 text-sm bg-[#1877F2] text-white rounded-md hover:bg-[#166FE5] transition">
-      Sell Item
-    </button></Link>
-    <button className=" cursor-pointer w-40 px-4 py-2 text-sm bg-[#1877F2] text-white rounded-md hover:bg-[#166FE5] transition">
-      Sell Status
-    </button>
-    <button className="cursor-pointer mb-2 w-40 px-4 py-2 text-sm bg-[#1877F2] text-white rounded-md hover:bg-[#166FE5] transition">
-      Order Status
-    </button>
-  </div>
-) : (
-  <div className="flex flex-col items-center space-y-3">
-    <button className="cursor-pointer mb-2 w-40 px-4 py-2 text-sm bg-[#1877F2] text-white rounded-md hover:bg-[#166FE5] transition">
-      Order Status
-    </button>
-  </div>
-)}
+                <div className="flex flex-col items-center space-y-3">
+                  <Link to={"/sellitem"} state={{ _id: user._id }}> <button className=" cursor-pointer w-40 px-4 py-2 text-sm bg-[#1877F2] text-white rounded-md hover:bg-[#166FE5] transition">
+                    Sell Item
+                  </button></Link>
+                  <button className=" cursor-pointer w-40 px-4 py-2 text-sm bg-[#1877F2] text-white rounded-md hover:bg-[#166FE5] transition">
+                    Sell Status
+                  </button>
+                  <button className="cursor-pointer mb-2 w-40 px-4 py-2 text-sm bg-[#1877F2] text-white rounded-md hover:bg-[#166FE5] transition">
+                    Order Status
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center space-y-3">
+                  <button className="cursor-pointer mb-2 w-40 px-4 py-2 text-sm bg-[#1877F2] text-white rounded-md hover:bg-[#166FE5] transition">
+                    Order Status
+                  </button>
+                </div>
+              )}
 
 
             </div>
           </div>
-          
+
         </div>
 
         {/* Main Content */}
@@ -365,10 +365,38 @@ function Profile({ useremail, setEMAIL }) {
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-lg font-medium">Manage Addresses</h2>
               </div>
-              <button className="flex items-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg text-blue-500 hover:border-blue-500 transition-colors">
-                <Plus className="w-5 h-5" />
-                <span>Add A New Address</span>
-              </button>
+              <Link to={"/address"} state={{ _id: user._id }}>
+                <button className="cursor-pointer flex items-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg text-blue-500 hover:border-blue-500 transition-colors">
+                  <Plus className="w-5 h-5" />
+                  <span>Add A New Address</span>
+                </button>
+              </Link>
+
+             {/*showing address*/}
+             <div className="mt-4 space-y-4">
+        <div className="flex justify-between items-center p-4 border rounded-lg shadow-sm bg-gray-50">
+          <div>
+            <p className="font-semibold">123 Main Street</p>
+            <p className="text-sm text-gray-600">Downtown, 123456</p>
+            <p className="text-sm text-gray-600">Phone: 9876543210</p>
+          </div>
+          <button className="p-2 text-red-500 hover:text-red-700">
+            <Trash className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="flex justify-between items-center p-4 border rounded-lg shadow-sm bg-gray-50">
+          <div>
+            <p className="font-semibold">456 Elm Street</p>
+            <p className="text-sm text-gray-600">Uptown, 654321</p>
+            <p className="text-sm text-gray-600">Phone: 8765432109</p>
+          </div>
+          <button className="p-2 text-red-500 hover:text-red-700">
+            <Trash className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+
             </div>
           )}
         </div>
