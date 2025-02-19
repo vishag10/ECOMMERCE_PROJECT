@@ -62,7 +62,7 @@ export async function Homebuyer(req, res) {
         console.log(req.user);
         const _id = req.user.userID;
         const user = await userSchema.findOne({ _id });
-        res.status(200).send({ username: user.username, email: user.email });
+        res.status(200).send({ username: user.username, email: user.email,accounttype: user.accounttype,_id: user._id });
 
     } catch (error) {
         res.status(400).send({ error })

@@ -8,14 +8,16 @@ import apiPath from "./path/apipath";
 import { User as UserIcon, Box, UserCog, Plus } from 'lucide-react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import { ChevronDown } from "lucide-react";
 function Profile({ useremail, setEMAIL }) {
-  const [user, setUser] = useState({ email: "", username: "" });
+  const [user, setUser] = useState({ email: "", username: "",accounttype: "",_id:"" });
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [profile, setProfile] = useState(null);
   const navigate = useNavigate();
   const [updateuser, setupdateUser] = useState({ email: "", username: "", phone: "" });
 
+
+  
   const [isEditing, setIsEditing] = useState({
     username: false,
     email: false,
@@ -66,7 +68,12 @@ function Profile({ useremail, setEMAIL }) {
 
       if (res.status === 200) {
         console.log("User Data:", res.data);
-        setUser({ email: res.data.email, username: res.data.username });
+        setUser({ email: res.data.email, username: res.data.username,accounttype:res.data.accounttype,_id:res.data._id });
+        
+        
+        
+        
+        
       }
     } catch (error) {
       console.error("Error:", error.response ? error.response.data : error);
@@ -76,6 +83,8 @@ function Profile({ useremail, setEMAIL }) {
       }
     }
   };
+  console.log(user);
+  
 
   const getProfile = async () => {
     if (!user.email) return;
@@ -83,7 +92,7 @@ function Profile({ useremail, setEMAIL }) {
     try {
       const res = await axios.post(`${apiPath()}/getuser`, { email: user.email });
       if (res.status === 200) {
-        console.log("User Data:", res.data);
+        // console.log("User Data:", res.data);
         setProfile(res.data);
       }
     } catch (error) {
@@ -244,9 +253,32 @@ function Profile({ useremail, setEMAIL }) {
                 >
                   Manage Addresses
                 </div>
+                
               </div>
+              {user.accounttype === "seller" ? (
+  <div className="flex flex-col items-center space-y-3">
+   <Link to={"/sellitem"} state={{ _id: user._id }}> <button className=" cursor-pointer w-40 px-4 py-2 text-sm bg-[#1877F2] text-white rounded-md hover:bg-[#166FE5] transition">
+      Sell Item
+    </button></Link>
+    <button className=" cursor-pointer w-40 px-4 py-2 text-sm bg-[#1877F2] text-white rounded-md hover:bg-[#166FE5] transition">
+      Sell Status
+    </button>
+    <button className="cursor-pointer mb-2 w-40 px-4 py-2 text-sm bg-[#1877F2] text-white rounded-md hover:bg-[#166FE5] transition">
+      Order Status
+    </button>
+  </div>
+) : (
+  <div className="flex flex-col items-center space-y-3">
+    <button className="cursor-pointer mb-2 w-40 px-4 py-2 text-sm bg-[#1877F2] text-white rounded-md hover:bg-[#166FE5] transition">
+      Order Status
+    </button>
+  </div>
+)}
+
+
             </div>
           </div>
+          
         </div>
 
         {/* Main Content */}
@@ -281,7 +313,7 @@ function Profile({ useremail, setEMAIL }) {
                   <div className="mb-6">
                     <div className="flex justify-between items-center mb-4">
                       <h2 className="text-lg font-medium">Email Address</h2>
-                      <button
+                      {/* <button
                         className="cursor-pointer text-blue-500"
                         onClick={() => {
                           toggleEdit("email");
@@ -289,7 +321,7 @@ function Profile({ useremail, setEMAIL }) {
                         }}
                       >
                         {isEditing.email ? "Save" : "Edit"}
-                      </button>
+                      </button> */}
                     </div>
                     <input
                       type="email"

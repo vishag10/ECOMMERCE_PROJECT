@@ -19,7 +19,7 @@ app.use(express.static(path.join('../clientside')))
 // app.get("*",(req,res)=>{
 //     res.status(200).sendFile(path.join(__dirname,"../frontend/dist/index.html"))
 // })
-app.use(express.json())
+app.use(express.json({limit:"100mb"}))
 app.use("/api",router)
 
 connection().then(()=>{

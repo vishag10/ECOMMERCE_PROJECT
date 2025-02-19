@@ -1,6 +1,7 @@
 import { Router } from "express";
 import * as rh from "./RequestHandler/admin.requesthandler.js"
 import * as bh from "./RequestHandler/buyeOrSeller.requesthandler.js"
+import * as ph from "./RequestHandler/product.requesthandler.js"
 
 import Auth from "./middleware/auth.js";
 
@@ -22,6 +23,9 @@ router.route("/sellerforgot").post(bh.passwordRequest);
 router.route("/forgotbuyerseller").post(bh.passwordRequest);
 router.route("/sellerpasswordchange").put(bh.resetPassword);
 router.route("/sellerupdate").put(bh.updateUser);
+
+//product
+router.route("/addproduct").post(ph.addProduct);
 
 
 
