@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const userSchema=new mongoose.Schema({
     product_name:{type:String, required:true},
-    _id:{type:String, required:true},
+    product_id:{type:String, required:true},
     category:{type:String, required:true},
     price:{type:Number, required:true},
     photos:{type:Array, required:true},

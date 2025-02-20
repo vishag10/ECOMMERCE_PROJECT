@@ -20,14 +20,9 @@ function SellItem() {
     quantity: "",
     cname: "",
     clocation: "",
-    _id: _id 
+    product_id: _id 
   });
 
-  useEffect(() => {
-    if (_id) {
-      setProduct(prevState => ({ ...prevState, _id: _id }));
-    }
-  }, [_id]);
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];

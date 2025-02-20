@@ -5,6 +5,7 @@ import axios from "axios";
 import apiPath from "./path/apipath";
 
 function Address() {
+    
     const location = useLocation();
     const _id = location.state?._id;
     const navigate = useNavigate();
@@ -15,36 +16,30 @@ function Address() {
         district: "",
         pincode: "",
         phone: "",
-        _id: _id || ""
+        address_id: _id 
     });
 
-    useEffect(() => {
-        console.log("Updated _id:", _id);
-        if (_id) {
-            setAdress(prevState => ({ ...prevState, _id }));
-        }
-    }, [_id]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+      
         if (!address.line || !address.district || !address.pincode || !address.phone) {
-            toast.error("All fields are required!", { theme: "dark" });
-            return;
+          toast.error("All fields are required!", { theme: "dark" });
+          return;
         }
-
+      
         try {
-            const res = await axios.post(`${apiPath()}/addaddress`, address);
-            if (res.status === 201) {
-                toast.success(res.data.msg, { theme: "dark" });
-                setAdress({ line: "", district: "", pincode: "", phone: "", _id: "" });
-                setTimeout(() => navigate("/profile"), 3000);
-            }
+          const res = await axios.post(`${apiPath()}/addaddress`, address);
+          if (res.status === 201) {
+            toast.success(res.data.msg, { theme: "dark" });
+            setAdress({ line: "", district: "", pincode: "", phone: ""});
+            setTimeout(() => navigate("/profile"), 3000);
+          }
         } catch (error) {
-            console.log("Error submitting address:", error);
-            toast.error("Failed to add address", { theme: "dark" });
+          console.log("Error submitting address:", error);
+          toast.error("Failed to add address", { theme: "dark" });
         }
-    };
+      };
 
     return (
         <>

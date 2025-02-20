@@ -8,15 +8,65 @@ import apiPath from "./path/apipath";
 import { User as UserIcon, Box, UserCog, Plus } from 'lucide-react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import {  Trash } from "lucide-react";
+import { Trash } from "lucide-react";
+
 function Profile({ useremail, setEMAIL }) {
   const [user, setUser] = useState({ email: "", username: "", accounttype: "", _id: "" });
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [profile, setProfile] = useState(null);
   const navigate = useNavigate();
   const [updateuser, setupdateUser] = useState({ email: "", username: "", phone: "" });
+  const [address, setAddress] = useState([]); 
 
 
+  const deleteAddress =async (_id)=>{
+      try {
+        const res = await axios.delete(`${apiPath()}/deleteaddress/${_id}`)
+        const {msg}=res.data;
+        if (res.status === 200) {
+          const { msg } = res.data;
+          toast.success(msg, {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
+          setTimeout(() => window.location.reload(), 3000);
+        }
+
+      } catch (error) {
+        console.log(error);
+        
+      }
+  }
+  
+
+  const getAddress = async () => {
+    const token = localStorage.getItem("token");
+    console.log("Token before request:", token);
+
+    if (!token) {
+      setTimeout(() => navigate("/buyerorsellerlogin"), 3000);
+      return;
+    }
+
+    try {
+      const res = await axios.get(`${apiPath()}/getaddress/${user._id}`);
+      if (res.status === 200) {
+        console.log("address:", res.data);
+        setAddress(res.data);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  useEffect(() => {
+    getAddress();
+  }, [user._id]);
 
   const [isEditing, setIsEditing] = useState({
     username: false,
@@ -47,8 +97,6 @@ function Profile({ useremail, setEMAIL }) {
           progress: undefined,
         });
         setTimeout(() => window.location.reload(), 3000);
-        // // Refresh the page after successful update
-        // window.location.reload();
       }
     } catch (error) {
       console.log(error);
@@ -69,11 +117,6 @@ function Profile({ useremail, setEMAIL }) {
       if (res.status === 200) {
         console.log("User Data:", res.data);
         setUser({ email: res.data.email, username: res.data.username, accounttype: res.data.accounttype, _id: res.data._id });
-
-
-
-
-
       }
     } catch (error) {
       console.error("Error:", error.response ? error.response.data : error);
@@ -83,8 +126,6 @@ function Profile({ useremail, setEMAIL }) {
       }
     }
   };
-  console.log(user);
-
 
   const getProfile = async () => {
     if (!user.email) return;
@@ -92,7 +133,6 @@ function Profile({ useremail, setEMAIL }) {
     try {
       const res = await axios.post(`${apiPath()}/getuser`, { email: user.email });
       if (res.status === 200) {
-        // console.log("User Data:", res.data);
         setProfile(res.data);
       }
     } catch (error) {
@@ -140,31 +180,16 @@ function Profile({ useremail, setEMAIL }) {
           <img src={logo} className="w-18 h-16 mt-1.5" alt="Logo" />
         </div>
 
-
         <div className="hidden lg:flex items-center space-x-8">
-          <a href="#" className="text-sm font-medium hover:text-gray-600">
-            New & Featured
-          </a>
-          <a href="#" className="text-sm font-medium hover:text-gray-600">
-            Men
-          </a>
-          <a href="#" className="text-sm font-medium hover:text-gray-600">
-            Women
-          </a>
-          <a href="#" className="text-sm font-medium hover:text-gray-600">
-            Kids
-          </a>
-          <a href="#" className="text-sm font-medium hover:text-gray-600">
-            Sale
-          </a>
-          <a href="#" className="text-sm font-medium hover:text-gray-600">
-            SNKRS
-          </a>
+          <a href="#" className="text-sm font-medium hover:text-gray-600">New & Featured</a>
+          <a href="#" className="text-sm font-medium hover:text-gray-600">Men</a>
+          <a href="#" className="text-sm font-medium hover:text-gray-600">Women</a>
+          <a href="#" className="text-sm font-medium hover:text-gray-600">Kids</a>
+          <a href="#" className="text-sm font-medium hover:text-gray-600">Sale</a>
+          <a href="#" className="text-sm font-medium hover:text-gray-600">SNKRS</a>
         </div>
 
-
         <div className="flex items-center space-x-6 relative">
-
           <div className="hidden md:flex items-center bg-gray-100 rounded-full">
             <div className="flex items-center px-4 py-2">
               <Search className="w-4 h-4 text-gray-500" />
@@ -181,17 +206,14 @@ function Profile({ useremail, setEMAIL }) {
           <Heart className="w-6 h-6 cursor-pointer hover:text-gray-600" />
           <ShoppingBag className="w-6 h-6 cursor-pointer hover:text-gray-600" />
 
-          {/* Profile Section */}
           {user.username ? (
             <div className="relative">
-
               <button
-                className=" cursor-pointer w-10 h-10 flex items-center justify-center text-white font-semibold rounded-full bg-gray-800 hover:bg-gray-700 focus:outline-none"
+                className="cursor-pointer w-10 h-10 flex items-center justify-center text-white font-semibold rounded-full bg-gray-800 hover:bg-gray-700 focus:outline-none"
                 onClick={() => setDropdownOpen(!dropdownOpen)}
               >
                 {user.username.charAt(0).toUpperCase()}
               </button>
-
 
               {dropdownOpen && (
                 <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg">
@@ -214,11 +236,9 @@ function Profile({ useremail, setEMAIL }) {
           )}
         </div>
       </nav>
+
       <div className="flex gap-6 p-6 bg-gray-50 min-h-screen">
-
         <div className="w-64">
-
-
           <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center">
@@ -228,11 +248,9 @@ function Profile({ useremail, setEMAIL }) {
                 <div className="text-sm text-gray-500">
                   Hello, {profile ? profile.username : "Loading..."}
                 </div>
-                <div className="font-medium"></div>
               </div>
             </div>
           </div>
-
 
           <div className="bg-white rounded-lg shadow-sm">
             <div>
@@ -253,14 +271,15 @@ function Profile({ useremail, setEMAIL }) {
                 >
                   Manage Addresses
                 </div>
-
               </div>
               {user.accounttype === "seller" ? (
                 <div className="flex flex-col items-center space-y-3">
-                  <Link to={"/sellitem"} state={{ _id: user._id }}> <button className=" cursor-pointer w-40 px-4 py-2 text-sm bg-[#1877F2] text-white rounded-md hover:bg-[#166FE5] transition">
-                    Sell Item
-                  </button></Link>
-                  <button className=" cursor-pointer w-40 px-4 py-2 text-sm bg-[#1877F2] text-white rounded-md hover:bg-[#166FE5] transition">
+                  <Link to={"/sellitem"} state={{ _id: user._id }}>
+                    <button className="cursor-pointer w-40 px-4 py-2 text-sm bg-[#1877F2] text-white rounded-md hover:bg-[#166FE5] transition">
+                      Sell Item
+                    </button>
+                  </Link>
+                  <button className="cursor-pointer w-40 px-4 py-2 text-sm bg-[#1877F2] text-white rounded-md hover:bg-[#166FE5] transition">
                     Sell Status
                   </button>
                   <button className="cursor-pointer mb-2 w-40 px-4 py-2 text-sm bg-[#1877F2] text-white rounded-md hover:bg-[#166FE5] transition">
@@ -274,14 +293,10 @@ function Profile({ useremail, setEMAIL }) {
                   </button>
                 </div>
               )}
-
-
             </div>
           </div>
-
         </div>
 
-        {/* Main Content */}
         <div className="flex-1 bg-white rounded-lg shadow-sm p-6">
           {activeSection === 'profile' ? (
             <>
@@ -313,15 +328,6 @@ function Profile({ useremail, setEMAIL }) {
                   <div className="mb-6">
                     <div className="flex justify-between items-center mb-4">
                       <h2 className="text-lg font-medium">Email Address</h2>
-                      {/* <button
-                        className="cursor-pointer text-blue-500"
-                        onClick={() => {
-                          toggleEdit("email");
-                          if (isEditing.email) handleUpdate();
-                        }}
-                      >
-                        {isEditing.email ? "Save" : "Edit"}
-                      </button> */}
                     </div>
                     <input
                       type="email"
@@ -372,31 +378,20 @@ function Profile({ useremail, setEMAIL }) {
                 </button>
               </Link>
 
-             {/*showing address*/}
-             <div className="mt-4 space-y-4">
-        <div className="flex justify-between items-center p-4 border rounded-lg shadow-sm bg-gray-50">
-          <div>
-            <p className="font-semibold">123 Main Street</p>
-            <p className="text-sm text-gray-600">Downtown, 123456</p>
-            <p className="text-sm text-gray-600">Phone: 9876543210</p>
-          </div>
-          <button className="p-2 text-red-500 hover:text-red-700">
-            <Trash className="w-5 h-5" />
-          </button>
-        </div>
-
-        <div className="flex justify-between items-center p-4 border rounded-lg shadow-sm bg-gray-50">
-          <div>
-            <p className="font-semibold">456 Elm Street</p>
-            <p className="text-sm text-gray-600">Uptown, 654321</p>
-            <p className="text-sm text-gray-600">Phone: 8765432109</p>
-          </div>
-          <button className="p-2 text-red-500 hover:text-red-700">
-            <Trash className="w-5 h-5" />
-          </button>
-        </div>
-      </div>
-
+              <div className="mt-4 space-y-4">
+                {address.map((addr, index) => (
+                  <div key={index} className="flex justify-between items-center p-4 border rounded-lg shadow-sm bg-gray-50">
+                    <div>
+                      <p className="font-semibold">{addr.line}</p>
+                      <p className="text-sm text-gray-600">{addr.district}, {addr.pincode}</p>
+                      <p className="text-sm text-gray-600">Phone: {addr.phone}</p>
+                    </div>
+                    <button className="p-2 text-red-500 hover:text-red-700" onClick={() => deleteAddress(addr._id)}>
+                      <Trash className="w-5 h-5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>

@@ -30,6 +30,8 @@ router.route("/addproduct").post(ph.addProduct);
 
 //address
 router.route("/addaddress").post(ah.addAddress);
+router.route("/getaddress/:_id").get(ah.getAddresses);
+router.route("/deleteaddress/:_id").delete(ah.deleteAddress);
 
 
 
