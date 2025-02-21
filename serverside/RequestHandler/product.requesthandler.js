@@ -23,3 +23,13 @@ export async function getProducts(req,res){
         
     }
 }
+export async function getProduct(req,res){
+    try {
+        const {_id}=req.params;
+        const products = await productSchema.findOne({_id});
+        res.status(200).send(products)
+    } catch (error) {
+        console.log(error);
+        
+    }
+}

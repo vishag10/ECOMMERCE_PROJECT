@@ -12,7 +12,7 @@ const ProductCard = ({ product }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-   <Link> <div 
+   <Link to={`/product/${product._id}`}> <div 
       className="group relative w-full"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

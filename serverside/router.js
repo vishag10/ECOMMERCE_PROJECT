@@ -28,6 +28,7 @@ router.route("/sellerupdate").put(bh.updateUser);
 //product
 router.route("/addproduct").post(ph.addProduct);
 router.route("/getproduct").get(ph.getProducts);
+router.route("/oneproduct/:_id").get(ph.getProduct);
 
 //address
 router.route("/addaddress").post(ah.addAddress);
