@@ -12,7 +12,7 @@ const ProductCard = ({ product }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <div 
+   <Link> <div 
       className="group relative w-full"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -20,7 +20,7 @@ const ProductCard = ({ product }) => {
       <div className="border-none shadow-none hover:shadow-none bg-transparent">
         <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100">
           <img
-            src={product.photos?.[0] || "/api/placeholder/400/400"} // Fallback for missing image
+            src={product.photos?.[0] } 
             alt="Product"
             className={`h-full w-full object-cover object-center transition-all duration-700 ease-in-out
               ${isHovered ? 'scale-110' : 'scale-100'}`}
@@ -37,7 +37,7 @@ const ProductCard = ({ product }) => {
           <p className="text-sm text-gray-500">{product.category}</p>
         </div>
       </div>
-    </div>
+    </div></Link>
   );
 };
 
@@ -48,6 +48,8 @@ function Home({ useremail, setEMAIL }) {
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [products, setProducts] = useState([]); // Initialize as empty array
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const getProducts = async () => {
     try {
@@ -61,13 +63,11 @@ function Home({ useremail, setEMAIL }) {
   };
 
   const categories = [
-
     "vegitables",
     "fruits",
     "fastfood",
     "biscuits",
     "grains"
-    
   ];
 
   const navigate = useNavigate();
@@ -125,6 +125,21 @@ function Home({ useremail, setEMAIL }) {
     setTimeout(() => navigate("/buyerorsellerlogin"), 3000);
   };
 
+  const handleCategoryChange = (category) => {
+    setSelectedCategories(prev =>
+      prev.includes(category)
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    );
+  };
+
+  const filteredProducts = products.filter(product => {
+    const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(product.category);
+    const matchesPrice = (!minPrice || product.price >= minPrice) && (!maxPrice || product.price <= maxPrice);
+    const matchesSearch = product.product_name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesPrice && matchesSearch;
+  });
+
   return (
     <>
       <nav className="flex items-center justify-between px-8 py-4 bg-white border-b">
@@ -162,6 +177,8 @@ function Home({ useremail, setEMAIL }) {
                 type="text"
                 placeholder="Search"
                 className="bg-transparent border-none outline-none ml-2 text-sm w-32"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
             <button className="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-full text-sm font-medium transition-colors">
@@ -230,11 +247,17 @@ function Home({ useremail, setEMAIL }) {
             <h2 className="text-xl font-bold mb-8">Filters</h2>
             
             <div className="mb-8">
-              <h3 className="text-lg font-medium mb-4">Sport</h3>
+              <h3 className="text-lg font-medium mb-4">Categories</h3>
               <div className="space-y-4">
                 {categories.map((category) => (
                   <div key={category} className="flex items-center">
-                    <input type="checkbox" id={category} className="rounded-full" />
+                    <input 
+                      type="checkbox" 
+                      id={category} 
+                      className="rounded-full"
+                      checked={selectedCategories.includes(category)}
+                      onChange={() => handleCategoryChange(category)}
+                    />
                     <label htmlFor={category} className="ml-3 text-sm text-gray-700">
                       {category}
                     </label>
@@ -272,8 +295,8 @@ function Home({ useremail, setEMAIL }) {
 
         <div className="flex-1 px-6 py-8 lg:px-12">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 max-w-7xl mx-auto">
-            {products.length > 0 ? (
-              products.map((product) => (
+            {filteredProducts.length > 0 ? (
+              filteredProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))
             ) : (
