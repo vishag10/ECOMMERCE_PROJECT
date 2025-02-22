@@ -18,6 +18,7 @@ import SellItem from './components/sellitem';
 import Address from './components/address';
 import Product from './components/product';
 import CartPage from './components/cart';
+import SellerProducts from './components/sellerproducts';
 
 const ThemeContext = createContext(null);
 
@@ -46,6 +47,8 @@ function App() {
 
     //product
     <Route path="/product/:_id" element={<Product/>} />
+    <Route path="/sellerproducts/:_id" element={<SellerProducts/>} />
+
 
     //Cart
     <Route path="/cart" element={<CartPage/>} />

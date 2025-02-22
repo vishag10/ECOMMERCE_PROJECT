@@ -33,3 +33,16 @@ export async function getProduct(req,res){
         
     }
 }
+
+export async function sellerProduct(req,res){
+    try {
+        const {_id}=req.params;
+        const product_id=_id
+        const products = await productSchema.find({product_id});
+        res.status(200).send(products)
+    } catch (error) {
+        console.log(error);
+        
+    }
+    
+}
