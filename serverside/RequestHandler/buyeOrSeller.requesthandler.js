@@ -56,7 +56,8 @@ export async function loginbuyer(req, res) {
 }
 
 
-export async function Homebuyer(req, res) {
+export async function 
+Homebuyer(req, res) {
     try {
         console.log("end point");
         console.log(req.user);

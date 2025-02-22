@@ -17,6 +17,7 @@ import AdminHome from './components/adminFrontpage';
 import SellItem from './components/sellitem';
 import Address from './components/address';
 import Product from './components/product';
+import CartPage from './components/cart';
 
 const ThemeContext = createContext(null);
 
@@ -45,6 +46,9 @@ function App() {
 
     //product
     <Route path="/product/:_id" element={<Product/>} />
+
+    //Cart
+    <Route path="/cart" element={<CartPage/>} />
      </Routes>
   </BrowserRouter>
   </ThemeContext.Provider>

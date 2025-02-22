@@ -141,7 +141,7 @@ function Home({ useremail, setEMAIL }) {
   });
 
   return (
-    <>
+    < >
       <nav className="flex items-center justify-between px-8 py-4 bg-white border-b">
         <ToastContainer />
         <div className="flex items-center">
@@ -186,7 +186,7 @@ function Home({ useremail, setEMAIL }) {
             </button>
           </div>
           <Heart className="w-6 h-6 cursor-pointer hover:text-gray-600" />
-          <ShoppingBag className="w-6 h-6 cursor-pointer hover:text-gray-600" />
+         <Link to={"/cart"}> <ShoppingBag className="w-6 h-6 cursor-pointer hover:text-gray-600" /></Link>
 
           {user.username ? (
             <div className="relative">
@@ -233,7 +233,7 @@ function Home({ useremail, setEMAIL }) {
           <Filter size={24} />
         </button>
 
-        <div className={`fixed lg:relative right-0 top-0 h-full w-72 bg-white shadow-lg transform transition-transform duration-300 ease-in-out z-40 
+        <div className={`fixed  lg:relative right-0 top-0 h-full w-72 bg-white shadow-lg transform transition-transform duration-300 ease-in-out z-40 
           ${isFilterOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}`}>
           
           <button
