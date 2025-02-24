@@ -46,3 +46,15 @@ export async function sellerProduct(req,res){
     }
     
 }
+
+export async function deleteProduct(req, res) {
+    const {_id}=req.params;
+    await productSchema.deleteOne({_id})
+    .then(()=>{
+        res.status(200).send({msg:"item deleted successfully"})
+    }).catch((err)=>{
+        res.status(500).send(err)
+    })
+
+    
+}
