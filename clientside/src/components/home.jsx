@@ -29,12 +29,12 @@ const ProductCard = ({ product }) => {
             <Heart size={20} className="text-gray-800" />
           </button>
         </div>
-        <div className="mt-4 space-y-2">
+        <div className="mt-3 space-y-1">
           <div className="flex justify-between">
-            <h3 className="text-lg font-medium text-gray-900">{product.product_name}</h3>
-            <span className="text-lg font-medium text-gray-900">${product.price}</span>
+            <h3 className="text-base font-medium text-gray-900">{product.product_name}</h3>
+            <span className="text-base font-medium text-gray-900">${product.price}</span>
           </div>
-          <p className="text-sm text-gray-500">{product.category}</p>
+          <p className="text-xs text-gray-500">{product.category}</p>
         </div>
       </div>
     </div></Link>
@@ -50,6 +50,7 @@ function Home({ useremail, setEMAIL }) {
   const [products, setProducts] = useState([]); // Initialize as empty array
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [scrollY, setScrollY] = useState(0);
 
   const getProducts = async () => {
     try {
@@ -104,6 +105,15 @@ function Home({ useremail, setEMAIL }) {
   useEffect(() => {
     getUser();
     getProducts();
+    
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, [useremail]);
 
   const handleLogout = () => {
@@ -141,8 +151,8 @@ function Home({ useremail, setEMAIL }) {
   });
 
   return (
-    < >
-      <nav className="flex items-center justify-between px-8 py-4 bg-white border-b">
+    <>
+      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-4 bg-white border-b shadow-sm transition-all duration-300">
         <ToastContainer />
         <div className="flex items-center">
           <img src={logo} className="w-18 h-16 mt-1.5" alt="Logo" />
@@ -225,16 +235,16 @@ function Home({ useremail, setEMAIL }) {
         </div>
       </nav>
 
-      <div className="flex min-h-screen bg-white">
+      <div className="flex min-h-screen bg-white pt-24">
         <button
           onClick={() => setIsFilterOpen(!isFilterOpen)}
-          className="fixed right-4 top-4 z-50 lg:hidden bg-white p-2 rounded-full shadow-lg"
+          className="fixed right-4 top-24 z-50 lg:hidden bg-white p-2 rounded-full shadow-lg"
         >
           <Filter size={24} />
         </button>
 
-        <div className={`fixed  lg:relative right-0 top-0 h-full w-72 bg-white shadow-lg transform transition-transform duration-300 ease-in-out z-40 
-          ${isFilterOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}`}>
+        <div className={`fixed left-0 top-24 bottom-0 h-[calc(100vh-6rem)] w-72 bg-white shadow-lg overflow-y-auto transition-transform duration-300 ease-in-out z-40 
+          ${isFilterOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
           
           <button
             onClick={() => setIsFilterOpen(false)}
@@ -243,7 +253,7 @@ function Home({ useremail, setEMAIL }) {
             <X size={24} />
           </button>
 
-          <div className="p-8">
+          <div className="p-8 sticky top-0">
             <h2 className="text-xl font-bold mb-8">Filters</h2>
             
             <div className="mb-8">
@@ -293,11 +303,16 @@ function Home({ useremail, setEMAIL }) {
           </div>
         </div>
 
-        <div className="flex-1 px-6 py-8 lg:px-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 max-w-7xl mx-auto">
+        <div className="flex-1 px-6 py-8 lg:ml-72 lg:px-10 transition-all duration-500 ease-in-out">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10 max-w-7xl mx-auto">
             {filteredProducts.length > 0 ? (
               filteredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <div key={product.id} className="transform transition-all duration-500 ease-in-out" style={{
+                  opacity: 1 - Math.min(0.3, scrollY / 1000),
+                  transform: `translateY(${Math.min(20, scrollY / 50)}px)`
+                }}>
+                  <ProductCard product={product} />
+                </div>
               ))
             ) : (
               <p className="text-center text-gray-500">No products found.</p>

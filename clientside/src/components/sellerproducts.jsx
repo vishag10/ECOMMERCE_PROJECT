@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import React from 'react';
 import { Edit, Trash2 } from 'lucide-react';
 import { useEffect, useState } from "react";
@@ -33,13 +33,13 @@ const ProductCard = ({ product, handleDelete }) => {
 
                 {/* Buttons Container */}
                 <div className="flex gap-2">
-                    <button
+                  <Link to={`/productedit/${product._id}`}><button
                         className="flex-1 flex items-center justify-center gap-2 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors duration-200"
-                        onClick={() => console.log('Edit clicked')}
+                        
                     >
                         <Edit size={16} />
                         <span>Edit</span>
-                    </button>
+                    </button></Link>  
 
                     <button
                         className="flex-1 flex items-center justify-center gap-2 bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 transition-colors duration-200"

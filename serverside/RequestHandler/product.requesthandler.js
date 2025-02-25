@@ -58,3 +58,14 @@ export async function deleteProduct(req, res) {
 
     
 }
+
+export async function updateProduct(req,res){
+    const {_id}=req.params;
+    const { product_name, category, price, photos, quantity, cname,clocation,product_id,discount} = req.body
+
+    if (!(product_name && category && price && photos && quantity&&cname&&clocation))
+        return res.status(404).send({ msg: "fields are empty" })
+    
+    await productSchema.updateOne({_id},{$set:{product_name, category, price, photos, quantity, cname,clocation,discount}})
+    res.status(200).send({msg:"item updated successfully"})
+}
