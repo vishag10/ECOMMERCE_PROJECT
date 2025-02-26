@@ -1,45 +1,258 @@
 import "./css/home.css";
-import React, { useState, useEffect } from "react";
-import { Search, Heart, ShoppingBag, Filter, X } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Search, Heart, ShoppingBag, Filter, X, ChevronLeft, ChevronRight } from "lucide-react";
 import logo from "../assets/prada-logo-svgrepo-com.svg";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import apiPath from "./path/apipath";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import carousel1 from "../assets/1.png"
+import carousel2 from "../assets/2.png"
+import carousel3 from "../assets/3.png"
+
+
 
 const ProductCard = ({ product }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-   <Link to={`/product/${product._id}`}> <div 
-      className="group relative w-full"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <div className="border-none shadow-none hover:shadow-none bg-transparent">
-        <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100">
-          <img
-            src={product.photos?.[0] } 
-            alt="Product"
-            className={`h-full w-full object-cover object-center transition-all duration-700 ease-in-out
-              ${isHovered ? 'scale-110' : 'scale-100'}`}
-          />
-          <button className="absolute top-4 right-4 p-2 rounded-full bg-white hover:bg-gray-100 transition-colors">
-            <Heart size={20} className="text-gray-800" />
-          </button>
-        </div>
-        <div className="mt-3 space-y-1">
-          <div className="flex justify-between">
-            <h3 className="text-base font-medium text-gray-900">{product.product_name}</h3>
-            <span className="text-base font-medium text-gray-900">${product.price}</span>
+    <Link to={`/product/${product._id}`}>
+      <div 
+        className="group relative w-full"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <div className="border-none shadow-none hover:shadow-none bg-transparent">
+          <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100">
+            <img
+              src={product.photos?.[0]} 
+              alt="Product"
+              className={`h-full w-full object-cover object-center transition-all duration-700 ease-in-out
+                ${isHovered ? 'scale-110' : 'scale-100'}`}
+            />
+            <button className="absolute top-4 right-4 p-2 rounded-full bg-white hover:bg-gray-100 transition-colors">
+              <Heart size={20} className="text-gray-800" />
+            </button>
           </div>
-          <p className="text-xs text-gray-500">{product.category}</p>
+          <div className="mt-3 space-y-1">
+            <div className="flex justify-between">
+              <h3 className="text-base font-medium text-gray-900">{product.product_name}</h3>
+              <span className="text-base font-medium text-gray-900">₹{product.price}</span>
+            </div>
+            <p className="text-xs text-gray-500">{product.category}</p>
+          </div>
         </div>
       </div>
-    </div></Link>
+    </Link>
   );
 };
+
+
+const MainCarousel = () => {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const timeoutRef = useRef(null);
+  
+  
+  const carouselImages = [
+    carousel1,
+    carousel2,
+    carousel3,
+    
+  ];
+
+  const resetTimeout = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+  };
+
+  useEffect(() => {
+    resetTimeout();
+    timeoutRef.current = setTimeout(() => {
+      setCurrentSlide((prevSlide) => 
+        prevSlide === carouselImages.length - 1 ? 0 : prevSlide + 1
+      );
+    }, 5000); 
+
+    return () => {
+      resetTimeout();
+    };
+  }, [currentSlide, carouselImages.length]);
+
+  const goToSlide = (index) => {
+    setCurrentSlide(index);
+  };
+
+  const goToPrevSlide = () => {
+    setCurrentSlide((prevSlide) => 
+      prevSlide === 0 ? carouselImages.length - 1 : prevSlide - 1
+    );
+  };
+
+  const goToNextSlide = () => {
+    setCurrentSlide((prevSlide) => 
+      prevSlide === carouselImages.length - 1 ? 0 : prevSlide + 1
+    );
+  };
+
+  return (
+    <div className="relative w-4/5 mx-auto h-48 md:h-56 lg:h-72 overflow-hidden rounded-lg shadow-md">
+      <div 
+        className="flex transition-transform duration-500 ease-out h-full"
+        style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+      >
+        {carouselImages.map((image, index) => (
+          <div key={index} className="w-full h-full flex-shrink-0">
+            <img 
+              src={image} 
+              alt={`Slide ${index + 1}`} 
+              className="w-full h-full object-cover" 
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Navigation Arrows */}
+      <button 
+        className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-white/50 hover:bg-white/80 p-2 rounded-full transition-colors"
+        onClick={goToPrevSlide}
+      >
+        <ChevronLeft size={24} />
+      </button>
+      <button 
+        className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-white/50 hover:bg-white/80 p-2 rounded-full transition-colors"
+        onClick={goToNextSlide}
+      >
+        <ChevronRight size={24} />
+      </button>
+
+      {/* Dots Indicator */}
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+        {carouselImages.map((_, index) => (
+          <button
+            key={index}
+            className={`w-3 h-3 rounded-full transition-colors ${
+              index === currentSlide ? 'bg-white' : 'bg-white/50'
+            }`}
+            onClick={() => goToSlide(index)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+
+const CategoryCarousel = ({ title, products }) => {
+  const [scrollPosition, setScrollPosition] = useState(0);
+  const carouselRef = useRef(null);
+  const timeoutRef = useRef(null);
+  
+  const scrollLeft = () => {
+    if (carouselRef.current) {
+      carouselRef.current.scrollBy({ left: -300, behavior: 'smooth' });
+    }
+  };
+  
+  const scrollRight = () => {
+    if (carouselRef.current) {
+      carouselRef.current.scrollBy({ left: 300, behavior: 'smooth' });
+    }
+  };
+
+
+  useEffect(() => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+    
+    const autoScroll = () => {
+      if (
+        carousel.scrollLeft + carousel.clientWidth >= carousel.scrollWidth - 10
+      ) {
+        
+        carousel.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        carousel.scrollBy({ left: 300, behavior: 'smooth' });
+      }
+    };
+    
+    timeoutRef.current = setInterval(autoScroll, 8000);
+    
+    return () => {
+      if (timeoutRef.current) {
+        clearInterval(timeoutRef.current);
+      }
+    };
+  }, []);
+  
+  
+  const handleScroll = () => {
+    if (carouselRef.current) {
+      setScrollPosition(carouselRef.current.scrollLeft);
+    }
+  };
+  
+  useEffect(() => {
+    const carousel = carouselRef.current;
+    if (carousel) {
+      carousel.addEventListener('scroll', handleScroll);
+      return () => carousel.removeEventListener('scroll', handleScroll);
+    }
+  }, []);
+  
+  const showLeftArrow = scrollPosition > 20;
+  const showRightArrow = carouselRef.current 
+    ? scrollPosition < carouselRef.current.scrollWidth - carouselRef.current.clientWidth - 20
+    : true;
+    
+  if (products.length === 0) return null;
+  
+  return (
+    <div className="mb-12">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+        <div className="flex space-x-2">
+          <button 
+            onClick={scrollLeft}
+            className={`p-2 rounded-full ${
+              showLeftArrow 
+                ? 'bg-gray-200 hover:bg-gray-300 text-gray-800' 
+                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            }`}
+            disabled={!showLeftArrow}
+          >
+            <ChevronLeft size={20} />
+          </button>
+          <button 
+            onClick={scrollRight}
+            className={`p-2 rounded-full ${
+              showRightArrow 
+                ? 'bg-gray-200 hover:bg-gray-300 text-gray-800' 
+                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            }`}
+            disabled={!showRightArrow}
+          >
+            <ChevronRight size={20} />
+          </button>
+        </div>
+      </div>
+      
+      <div 
+        ref={carouselRef}
+        className="flex overflow-x-auto pb-4 gap-6 hide-scrollbar"
+        style={{ scrollBehavior: 'smooth' }}
+      >
+        {products.map((product) => (
+          <div key={product._id} className="w-64 flex-shrink-0">
+            <ProductCard product={product} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 
 function Home({ useremail, setEMAIL }) {
   const [user, setUser] = useState({ email: "", username: "" });
@@ -47,7 +260,7 @@ function Home({ useremail, setEMAIL }) {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
-  const [products, setProducts] = useState([]); // Initialize as empty array
+  const [products, setProducts] = useState([]); 
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [scrollY, setScrollY] = useState(0);
@@ -143,12 +356,38 @@ function Home({ useremail, setEMAIL }) {
     );
   };
 
-  const filteredProducts = products.filter(product => {
-    const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(product.category);
-    const matchesPrice = (!minPrice || product.price >= minPrice) && (!maxPrice || product.price <= maxPrice);
-    const matchesSearch = product.product_name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesPrice && matchesSearch;
+  // Improved filter function that can be applied to any list of products
+  const applyFilters = (productsToFilter) => {
+    return productsToFilter.filter(product => {
+      const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(product.category);
+      const matchesPrice = (!minPrice || product.price >= Number(minPrice)) && 
+                           (!maxPrice || product.price <= Number(maxPrice));
+      const matchesSearch = searchQuery ? 
+        product.product_name.toLowerCase().includes(searchQuery.toLowerCase()) : true;
+      
+      return matchesCategory && matchesPrice && matchesSearch;
+    });
+  };
+
+  // Apply filters to the full product list
+  const filteredProducts = applyFilters(products);
+  
+  // Apply filters to each category
+  const filteredProductsByCategory = {};
+  categories.forEach(category => {
+    // Get products for this category
+    const categoryProducts = products.filter(product => product.category === category);
+    // Apply additional filters (price, search)
+    filteredProductsByCategory[category] = applyFilters(categoryProducts);
   });
+
+  const handleSearch = (e) => {
+    if (e.key === 'Enter' || e.type === 'click') {
+      // Apply the search filter now, it's already being handled by the onChange
+      // This is just to provide a clear action on button click or Enter press
+      console.log("Searching for:", searchQuery);
+    }
+  };
 
   return (
     <>
@@ -189,14 +428,18 @@ function Home({ useremail, setEMAIL }) {
                 className="bg-transparent border-none outline-none ml-2 text-sm w-32"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={handleSearch}
               />
             </div>
-            <button className="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-full text-sm font-medium transition-colors">
+            <button 
+              className="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-full text-sm font-medium transition-colors"
+              onClick={handleSearch}
+            >
               Search
             </button>
           </div>
           <Heart className="w-6 h-6 cursor-pointer hover:text-gray-600" />
-         <Link to={"/cart"}> <ShoppingBag className="w-6 h-6 cursor-pointer hover:text-gray-600" /></Link>
+          <Link to={"/cart"}> <ShoppingBag className="w-6 h-6 cursor-pointer hover:text-gray-600" /></Link>
 
           {user.username ? (
             <div className="relative">
@@ -235,91 +478,218 @@ function Home({ useremail, setEMAIL }) {
         </div>
       </nav>
 
-      <div className="flex min-h-screen bg-white pt-24">
+      <div className="flex min-h-screen bg-white pt-24 flex-col">
+        {/* Left side filter icon */}
         <button
           onClick={() => setIsFilterOpen(!isFilterOpen)}
-          className="fixed right-4 top-24 z-50 lg:hidden bg-white p-2 rounded-full shadow-lg"
+          className="fixed left-4 top-29 z-50 bg-white p-3 rounded-full shadow-lg hover:bg-gray-100 transition-all duration-300"
+          aria-label="Toggle filters"
         >
-          <Filter size={24} />
+          <Filter size={20} />
         </button>
 
-        <div className={`fixed left-0 top-24 bottom-0 h-[calc(100vh-6rem)] w-72 bg-white shadow-lg overflow-y-auto transition-transform duration-300 ease-in-out z-40 
-          ${isFilterOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
-          
-          <button
-            onClick={() => setIsFilterOpen(false)}
-            className="lg:hidden absolute right-4 top-4"
-          >
-            <X size={24} />
-          </button>
-
-          <div className="p-8 sticky top-0">
-            <h2 className="text-xl font-bold mb-8">Filters</h2>
+        {/* Filter dropdown */}
+        <div 
+          className={`fixed left-0 right-0 bg-white shadow-lg z-40 transition-all duration-500 ease-in-out overflow-hidden
+            ${isFilterOpen ? 'top-24 max-h-screen' : 'top-24 max-h-0'}`}
+        >
+          <div className="container mx-auto p-6 relative">
+            <button
+              onClick={() => setIsFilterOpen(false)}
+              className="absolute right-6 top-6 p-2 rounded-full hover:bg-gray-100"
+            >
+              <X size={20} />
+            </button>
             
-            <div className="mb-8">
-              <h3 className="text-lg font-medium mb-4">Categories</h3>
-              <div className="space-y-4">
-                {categories.map((category) => (
-                  <div key={category} className="flex items-center">
-                    <input 
-                      type="checkbox" 
-                      id={category} 
-                      className="rounded-full"
-                      checked={selectedCategories.includes(category)}
-                      onChange={() => handleCategoryChange(category)}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+              <div>
+                <h3 className="text-lg font-medium mb-4">Categories</h3>
+                <div className="space-y-3">
+                  {categories.map((category) => (
+                    <div key={category} className="flex items-center">
+                      <input 
+                        type="checkbox" 
+                        id={category} 
+                        className="rounded-full"
+                        checked={selectedCategories.includes(category)}
+                        onChange={() => handleCategoryChange(category)}
+                      />
+                      <label htmlFor={category} className="ml-3 text-sm text-gray-700 capitalize">
+                        {category}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-medium mb-4">Price Range</h3>
+                <div className="flex items-center space-x-4">
+                  <div className="flex-1">
+                    <input
+                      type="number"
+                      placeholder="Min"
+                      value={minPrice}
+                      onChange={(e) => setMinPrice(e.target.value)}
+                      className="w-full p-2 border rounded"
                     />
-                    <label htmlFor={category} className="ml-3 text-sm text-gray-700">
-                      {category}
-                    </label>
+                  </div>
+                  <span className="text-gray-400">to</span>
+                  <div className="flex-1">
+                    <input
+                      type="number"
+                      placeholder="Max"
+                      value={maxPrice}
+                      onChange={(e) => setMaxPrice(e.target.value)}
+                      className="w-full p-2 border rounded"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Active filters display */}
+            <div className="mt-6 max-w-4xl mx-auto">
+              <div className="flex flex-wrap gap-2 items-center">
+                <span className="text-sm text-gray-500">Active filters:</span>
+                
+                {/* Category filters */}
+                {selectedCategories.map(category => (
+                  <span key={category} className="bg-gray-100 px-3 py-1 rounded-full text-sm flex items-center">
+                    {category}
+                    <button 
+                      onClick={() => handleCategoryChange(category)} 
+                      className="ml-2 text-gray-500 hover:text-gray-700"
+                    >
+                      <X size={14} />
+                    </button>
+                  </span>
+                ))}
+                
+                {/* Price filter */}
+                {(minPrice || maxPrice) && (
+                  <span className="bg-gray-100 px-3 py-1 rounded-full text-sm flex items-center">
+                    Price: {minPrice || '0'} - {maxPrice || '∞'}
+                    <button 
+                      onClick={() => {
+                        setMinPrice('');
+                        setMaxPrice('');
+                      }} 
+                      className="ml-2 text-gray-500 hover:text-gray-700"
+                    >
+                      <X size={14} />
+                    </button>
+                  </span>
+                )}
+                
+                {/* Search filter */}
+                {searchQuery && (
+                  <span className="bg-gray-100 px-3 py-1 rounded-full text-sm flex items-center">
+                    Search: {searchQuery}
+                    <button 
+                      onClick={() => setSearchQuery('')} 
+                      className="ml-2 text-gray-500 hover:text-gray-700"
+                    >
+                      <X size={14} />
+                    </button>
+                  </span>
+                )}
+                
+                {/* Clear all */}
+                {(selectedCategories.length > 0 || minPrice || maxPrice || searchQuery) && (
+                  <button 
+                    onClick={() => {
+                      setSelectedCategories([]);
+                      setMinPrice('');
+                      setMaxPrice('');
+                      setSearchQuery('');
+                    }}
+                    className="text-sm text-blue-600 hover:text-blue-800 ml-2"
+                  >
+                    Clear all
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Image Carousel */}
+        <div className="mt-10 mb-10  ">
+          <MainCarousel />
+        </div>
+
+        {/* Category Product Carousels - now using filtered products */}
+        <div className="w-4/5 mx-auto space-y-10">
+          {/* Show filter result summary if filters are active */}
+          {(selectedCategories.length > 0 || minPrice || maxPrice || searchQuery) && (
+            <div className="text-sm text-gray-500 mb-4">
+              Showing {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'} 
+              {searchQuery && ` matching "${searchQuery}"`}
+              {selectedCategories.length > 0 && ` in ${selectedCategories.length} ${selectedCategories.length === 1 ? 'category' : 'categories'}`}
+              {(minPrice || maxPrice) && ` priced ${minPrice ? `from ₹${minPrice}` : ''} ${maxPrice ? `to ₹${maxPrice}` : ''}`}
+            </div>
+          )}
+
+          {/* Display Filtered Category Carousels */}
+          {categories.map(category => (
+            <div key={category}>
+              {filteredProductsByCategory[category]?.length > 0 && (
+                <CategoryCarousel 
+                  title={category.charAt(0).toUpperCase() + category.slice(1)} 
+                  products={filteredProductsByCategory[category]} 
+                />
+              )}
+            </div>
+          ))}
+
+          {/* Display "All Products" grid if no categories have products after filtering */}
+          {categories.every(category => !filteredProductsByCategory[category]?.length) && filteredProducts.length > 0 && (
+            <div className="mt-10">
+              <h2 className="text-xl font-bold mb-6 text-gray-900">All Products</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {filteredProducts.map((product) => (
+                  <div key={product._id} className="transform transition-all duration-500 ease-in-out" style={{
+                    opacity: 1 - Math.min(0.3, scrollY / 1000),
+                    transform: `translateY(${Math.min(20, scrollY / 50)}px)`
+                  }}>
+                    <ProductCard product={product} />
                   </div>
                 ))}
               </div>
             </div>
+          )}
 
-            <div className="mb-8">
-              <h3 className="text-lg font-medium mb-4">Price Range</h3>
-              <div className="flex items-center space-x-4">
-                <div className="flex-1">
-                  <input
-                    type="number"
-                    placeholder="Min"
-                    value={minPrice}
-                    onChange={(e) => setMinPrice(e.target.value)}
-                    className="w-full p-2 border rounded"
-                  />
-                </div>
-                <span className="text-gray-400">to</span>
-                <div className="flex-1">
-                  <input
-                    type="number"
-                    placeholder="Max"
-                    value={maxPrice}
-                    onChange={(e) => setMaxPrice(e.target.value)}
-                    className="w-full p-2 border rounded"
-                  />
-                </div>
-              </div>
+          {/* No Results Message */}
+          {filteredProducts.length === 0 && (
+            <div className="text-center py-16">
+              <p className="text-xl text-gray-500 mb-4">No products found matching your filters.</p>
+              <button 
+                onClick={() => {
+                  setSelectedCategories([]);
+                  setMinPrice('');
+                  setMaxPrice('');
+                  setSearchQuery('');
+                }}
+                className="px-4 py-2 bg-gray-200 rounded-full text-gray-800 hover:bg-gray-300 transition-colors"
+              >
+                Clear all filters
+              </button>
             </div>
-          </div>
-        </div>
-
-        <div className="flex-1 px-6 py-8 lg:ml-72 lg:px-10 transition-all duration-500 ease-in-out">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10 max-w-7xl mx-auto">
-            {filteredProducts.length > 0 ? (
-              filteredProducts.map((product) => (
-                <div key={product.id} className="transform transition-all duration-500 ease-in-out" style={{
-                  opacity: 1 - Math.min(0.3, scrollY / 1000),
-                  transform: `translateY(${Math.min(20, scrollY / 50)}px)`
-                }}>
-                  <ProductCard product={product} />
-                </div>
-              ))
-            ) : (
-              <p className="text-center text-gray-500">No products found.</p>
-            )}
-          </div>
+          )}
         </div>
       </div>
+
+      {/* CSS for hiding scrollbars but allowing scroll functionality */}
+      <style jsx>{`
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </>
   );
 }

@@ -1,11 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { Camera } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from 'react-toastify';
-import apiPath from "./path/apipath";
-import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
 import axios from "axios";
+import apiPath from "./path/apipath";
 
 function SellItem() {
   const location = useLocation();
@@ -16,33 +14,25 @@ function SellItem() {
     product_name: "",
     category: "",
     price: "",
-    photos: "",
+    photos: [],
     quantity: "",
     cname: "",
     clocation: "",
-    product_id: _id 
+    product_id: _id,
   });
 
-
   const handleFileChange = async (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const base64 = await convertBase64(file);
-      setProduct(prevState => ({ ...prevState, photos: base64 }));
-    }
+    const files = Array.from(e.target.files);
+    const base64Images = await Promise.all(files.map(convertBase64));
+    setProduct((prev) => ({ ...prev, photos: [...prev.photos, ...base64Images] }));
   };
-
 
   const convertBase64 = (file) => {
     return new Promise((resolve, reject) => {
       const fileReader = new FileReader();
       fileReader.readAsDataURL(file);
-      fileReader.onload = () => {
-        resolve(fileReader.result);
-      };
-      fileReader.onerror = (error) => {
-        reject(error);
-      };
+      fileReader.onload = () => resolve(fileReader.result);
+      fileReader.onerror = (error) => reject(error);
     });
   };
 
@@ -51,26 +41,16 @@ function SellItem() {
     try {
       const res = await axios.post(`${apiPath()}/addproduct`, product);
       if (res.status === 201) {
-        const { msg } = res.data;
-        toast.success(msg, {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "dark",
-        });
+        toast.success(res.data.msg, { position: "top-right", autoClose: 3000, theme: "dark" });
         setProduct({
           product_name: "",
           category: "",
           price: "",
-          photos: "",
+          photos: [],
           quantity: "",
           cname: "",
           clocation: "",
-          _id: ""
+          product_id: _id,
         });
         setTimeout(() => navigate("/profile"), 3000);
       }
@@ -90,7 +70,7 @@ function SellItem() {
             <select
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
               name="category"
-              onChange={(e) => setProduct(prev => ({ ...prev, category: e.target.value }))}
+              onChange={(e) => setProduct((prev) => ({ ...prev, category: e.target.value }))}
               value={product.category}
             >
               <option value="" disabled hidden>Select Category</option>
@@ -108,7 +88,7 @@ function SellItem() {
               type="text"
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
               name="product_name"
-              onChange={(e) => setProduct(prev => ({ ...prev, product_name: e.target.value }))}
+              onChange={(e) => setProduct((prev) => ({ ...prev, product_name: e.target.value }))}
               value={product.product_name}
             />
           </div>
@@ -119,7 +99,7 @@ function SellItem() {
               type="number"
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
               name="price"
-              onChange={(e) => setProduct(prev => ({ ...prev, price: e.target.value }))}
+              onChange={(e) => setProduct((prev) => ({ ...prev, price: e.target.value }))}
               value={product.price}
             />
           </div>
@@ -130,7 +110,7 @@ function SellItem() {
               type="number"
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
               name="quantity"
-              onChange={(e) => setProduct(prev => ({ ...prev, quantity: e.target.value }))}
+              onChange={(e) => setProduct((prev) => ({ ...prev, quantity: e.target.value }))}
               value={product.quantity}
             />
           </div>
@@ -141,7 +121,7 @@ function SellItem() {
               type="text"
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
               name="cname"
-              onChange={(e) => setProduct(prev => ({ ...prev, cname: e.target.value }))}
+              onChange={(e) => setProduct((prev) => ({ ...prev, cname: e.target.value }))}
               value={product.cname}
             />
           </div>
@@ -152,11 +132,12 @@ function SellItem() {
               type="text"
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
               name="clocation"
-              onChange={(e) => setProduct(prev => ({ ...prev, clocation: e.target.value }))}
+              onChange={(e) => setProduct((prev) => ({ ...prev, clocation: e.target.value }))}
               value={product.clocation}
             />
           </div>
 
+          {/* Image Upload */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700">Upload Images</label>
             <div className="flex items-center gap-3 mt-1">
@@ -174,6 +155,13 @@ function SellItem() {
                 className="hidden"
                 onChange={handleFileChange}
               />
+            </div>
+
+            {/* Display Selected Images */}
+            <div className="mt-3 grid grid-cols-4 gap-2">
+              {product.photos.map((photo, index) => (
+                <img key={index} src={photo} alt={`Preview ${index}`} className="w-20 h-20 object-cover rounded-md" />
+              ))}
             </div>
           </div>
 

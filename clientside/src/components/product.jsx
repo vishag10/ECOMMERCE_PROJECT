@@ -1,17 +1,23 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import logo from "../assets/prada-logo-svgrepo-com.svg";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import apiPath from "./path/apipath";
 import { ToastContainer, toast } from 'react-toastify';
-import { Plus, Minus, ShoppingCart, Search, Heart, ShoppingBag } from "lucide-react";
+import { Plus, Minus, ShoppingCart, Search, Heart, ShoppingBag, ChevronLeft, ChevronRight } from "lucide-react";
 
 function Product() {
   const [user, setUser] = useState({ email: "", username: "", accounttype: "", _id: "" });
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
-  const [product, setProduct] = useState({});
+  const [product, setProduct] = useState({ photos: [] });
   const { _id } = useParams();
+  const [cart, setCart] = useState({});
+  const [isAddedToCart, setIsAddedToCart] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const carouselRef = useRef(null);
+  const autoPlayRef = useRef(null);
+  const autoPlayInterval = 3000; // Time in ms between slides
 
   const getproduct = async () => {
     try {
@@ -57,6 +63,60 @@ function Product() {
     getproduct();
   }, []);
 
+  useEffect(() => {
+    if (user._id && product._id) {
+      setCart({ user_id: user._id, product_id: product._id });
+    }
+  }, [user, product]);
+
+  // Auto-play carousel functionality
+  useEffect(() => {
+    if (!product.photos || product.photos.length <= 1) return;
+
+    const play = () => {
+      autoPlayRef.current = setInterval(() => {
+        setCurrentImageIndex(prevIndex =>
+          prevIndex === product.photos.length - 1 ? 0 : prevIndex + 1
+        );
+      }, autoPlayInterval);
+    };
+
+    play();
+
+    // Cleanup interval on unmount
+    return () => {
+      if (autoPlayRef.current) {
+        clearInterval(autoPlayRef.current);
+      }
+    };
+  }, [product.photos]);
+
+  // Reset timer when manually changing slides
+  const resetTimer = () => {
+    if (autoPlayRef.current) {
+      clearInterval(autoPlayRef.current);
+      autoPlayRef.current = setInterval(() => {
+        setCurrentImageIndex(prevIndex =>
+          prevIndex === product.photos?.length - 1 ? 0 : prevIndex + 1
+        );
+      }, autoPlayInterval);
+    }
+  };
+
+  const handlePrevSlide = () => {
+    setCurrentImageIndex(prevIndex =>
+      prevIndex === 0 ? (product.photos?.length - 1 || 0) : prevIndex - 1
+    );
+    resetTimer();
+  };
+
+  const handleNextSlide = () => {
+    setCurrentImageIndex(prevIndex =>
+      prevIndex === (product.photos?.length - 1 || 0) ? 0 : prevIndex + 1
+    );
+    resetTimer();
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("useremail");
@@ -79,18 +139,80 @@ function Product() {
   const [quantity, setQuantity] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState(0);
 
-  const variants = product.photos
-    ? [
-        { id: 1, img: product.photos[0], color: "Blue" },
-        { id: 2, img: product.photos[0], color: "Silver" },
-        { id: 3, img: product.photos[0], color: "Green" },
-        { id: 4, img: product.photos[0], color: "Black" },
-      ]
-    : [];
+  // Mock photos array in case product doesn't have photos
+  const mockPhotos = [
+    "https://www.longines.com/media/catalog/product/cache/8db0cbef53b094d206272ae26deca8a4/l/3/l3.720.4.92.6_0001.png",
+    "https://www.longines.com/media/catalog/product/cache/8db0cbef53b094d206272ae26deca8a4/l/3/l3.720.4.92.6_0002.png",
+    "https://www.longines.com/media/catalog/product/cache/8db0cbef53b094d206272ae26deca8a4/l/3/l3.720.4.92.6_0003.png",
+    "https://www.longines.com/media/catalog/product/cache/8db0cbef53b094d206272ae26deca8a4/l/3/l3.720.4.92.6_0004.png"
+  ];
+
+  // Use product photos or mock photos if none exist
+  const displayPhotos = product.photos && product.photos.length > 0 ? product.photos : mockPhotos;
+
+  // Generate variants based on product photos or mock photos
+  const variants = displayPhotos.map((photo, index) => ({
+    id: index + 1,
+    img: photo,
+    color: ["Blue", "Silver", "Green", "Black"][index % 4] // Cycle through colors
+  }));
+
+  // Handle variant selection - change main image to match the selected variant
+  const handleVariantSelect = (index) => {
+    setSelectedVariant(index);
+    setCurrentImageIndex(index); // Change the main carousel image
+    resetTimer(); // Reset the auto-play timer
+  };
 
   const handleQuantityChange = (increment) => {
     setQuantity(prev => Math.max(1, prev + increment));
   };
+
+  const handleCart = async () => {
+    try {
+      const res = await axios.post(`${apiPath()}/addcart`, cart);
+      toast.success(res.data.msg, { position: "top-right", autoClose: 3000, theme: "dark" });
+      setIsAddedToCart(true); // Update state to reflect item is added to cart
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleGoToCart = () => {
+    navigate("/cart"); // Navigate to cart page
+  };
+
+  const checkCartStatus = async () => {
+    try {
+      if (!user._id || !product._id) return;
+
+      const res = await axios.get(`${apiPath()}/getcartcheck/${user._id}`);
+      const cartItems = res.data;
+
+      const isProductInCart = cartItems.some(item => item.product_id === product._id);
+
+      setIsAddedToCart(isProductInCart);
+    } catch (error) {
+      console.error("Error fetching cart details:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (user._id && product._id) {
+      checkCartStatus();
+    }
+  }, [user, product]);
+
+  // Calculate discounted price if discount exists
+  const calculateDiscountedPrice = () => {
+    if (product.discount && product.discount > 0) {
+      const discountAmount = (product.price * product.discount) / 100;
+      return product.price - discountAmount;
+    }
+    return product.price;
+  };
+
+  const discountedPrice = calculateDiscountedPrice();
 
   return (
     <>
@@ -159,24 +281,69 @@ function Product() {
 
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto p-4 lg:p-8">
-         
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 bg-white rounded-2xl shadow-sm p-4 lg:p-8">
-            
+            {/* Product Images Carousel */}
             <div className="relative">
-              <div className="sticky top-8">
-                <img 
-                  src={product.photos ? product.photos[0] : ""} 
-                  alt="Watch" 
-                  className="w-full h-auto rounded-xl shadow-lg"
-                />
+              <div className="sticky top-8 space-y-4">
+                <div className="relative overflow-hidden rounded-xl shadow-lg" ref={carouselRef}>
+                  <div className="relative aspect-square">
+                    {displayPhotos.map((photo, index) => (
+                      <div
+                        key={index}
+                        className={`absolute inset-0 transition-opacity duration-500 ease-in-out ${
+                          currentImageIndex === index ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                        }`}
+                      >
+                        <img
+                          src={photo}
+                          alt={`Product view ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Navigation arrows */}
+                  <button
+                    onClick={handlePrevSlide}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full shadow-md hover:bg-white transition-colors focus:outline-none"
+                    aria-label="Previous image"
+                  >
+                    <ChevronLeft className="w-6 h-6" />
+                  </button>
+
+                  <button
+                    onClick={handleNextSlide}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full shadow-md hover:bg-white transition-colors focus:outline-none"
+                    aria-label="Next image"
+                  >
+                    <ChevronRight className="w-6 h-6" />
+                  </button>
+                </div>
+
+                {/* Carousel indicators */}
+                <div className="flex justify-center gap-2 mt-2">
+                  {displayPhotos.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setCurrentImageIndex(index);
+                        resetTimer();
+                      }}
+                      className={`w-2 h-2 rounded-full transition-all ${
+                        currentImageIndex === index
+                          ? 'bg-blue-500 w-6'
+                          : 'bg-gray-300'
+                      }`}
+                      aria-label={`Go to slide ${index + 1}`}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
 
-         
+            {/* Product Details */}
             <div className="space-y-6 lg:space-y-8">
-              
-              
-
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <span className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm font-medium">New</span>
@@ -187,23 +354,23 @@ function Product() {
                 </p>
               </div>
 
-              
+              {/* Available Variations - These now directly change the main image */}
               <div className="space-y-3">
                 <h2 className="text-lg font-semibold text-gray-900">Available Variations</h2>
                 <div className="flex flex-wrap gap-4">
                   {variants.map((variant, index) => (
                     <button
                       key={variant.id}
-                      onClick={() => setSelectedVariant(index)}
+                      onClick={() => handleVariantSelect(index)}
                       className={`w-20 h-20 rounded-xl transition-transform transform hover:scale-105 ${
-                        selectedVariant === index 
-                          ? 'ring-2 ring-blue-500 ring-offset-2' 
+                        selectedVariant === index
+                          ? 'ring-2 ring-blue-500 ring-offset-2'
                           : 'ring-1 ring-gray-200'
                       }`}
                     >
-                      <img 
-                        src={variant.img} 
-                        alt={variant.color} 
+                      <img
+                        src={variant.img}
+                        alt={variant.color}
                         className="w-full h-full object-cover rounded-lg"
                       />
                     </button>
@@ -211,18 +378,18 @@ function Product() {
                 </div>
               </div>
 
-            
+              {/* Quantity Selector */}
               <div className="space-y-3">
                 <h2 className="text-lg font-semibold text-gray-900">Quantity</h2>
                 <div className="flex items-center gap-4">
-                  <button 
+                  <button
                     onClick={() => handleQuantityChange(-1)}
                     className="p-2 rounded-full border hover:bg-gray-100 transition-colors"
                   >
                     <Minus size={24} />
                   </button>
                   <span className="text-2xl font-medium w-12 text-center">{quantity}</span>
-                  <button 
+                  <button
                     onClick={() => handleQuantityChange(1)}
                     className="p-2 rounded-full border hover:bg-gray-100 transition-colors"
                   >
@@ -231,17 +398,46 @@ function Product() {
                 </div>
               </div>
 
+              {/* Price and Buttons */}
               <div className="space-y-4 pt-6">
                 <div className="flex items-baseline gap-2">
-                  <p className="text-3xl lg:text-4xl font-bold text-gray-900">₹{product.price || "203,000.00"}</p>
+                  {product.discount && product.discount > 0 ? (
+                    <>
+                      <p className="text-3xl lg:text-4xl font-bold text-gray-900">
+                        ₹{discountedPrice.toFixed(2)}
+                      </p>
+                      <p className="text-xl text-gray-500 line-through">
+                        ₹{product.price}
+                      </p>
+                      <span className="text-green-600 text-lg font-medium">
+                        ({product.discount}% off)
+                      </span>
+                    </>
+                  ) : (
+                    <p className="text-3xl lg:text-4xl font-bold text-gray-900">
+                      ₹{product.price || "203,000.00"}
+                    </p>
+                  )}
                   <span className="text-gray-500">inclusive of all taxes</span>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <button className="w-full bg-blue-600 text-white py-4 px-6 rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-lg font-medium">
-                    <ShoppingCart size={24} />
-                    Add to Cart
-                  </button>
+                  {isAddedToCart ? (
+                    <button
+                      onClick={handleGoToCart}
+                      className="w-full bg-green-600 text-white py-4 px-6 rounded-xl hover:bg-green-700 transition-colors flex items-center justify-center gap-2 text-lg font-medium"
+                    >
+                      Go to Cart
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleCart}
+                      className="w-full bg-blue-600 text-white py-4 px-6 rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-lg font-medium"
+                    >
+                      <ShoppingCart size={24} />
+                      Add to Cart
+                    </button>
+                  )}
                   <button className="w-full bg-gray-900 text-white py-4 px-6 rounded-xl hover:bg-gray-800 transition-colors text-lg font-medium">
                     Buy Now
                   </button>

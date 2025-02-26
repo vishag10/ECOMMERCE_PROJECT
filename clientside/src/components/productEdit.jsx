@@ -144,7 +144,7 @@ function ProductEdit() {
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700">Set Discount</label>
             <input
-              type="text"
+              type="number"
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
               onChange={(e) => setProduct((prev) => ({ ...prev, discount: e.target.value }))}
               value={product.discount}

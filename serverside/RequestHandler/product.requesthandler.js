@@ -69,3 +69,15 @@ export async function updateProduct(req,res){
     await productSchema.updateOne({_id},{$set:{product_name, category, price, photos, quantity, cname,clocation,discount}})
     res.status(200).send({msg:"item updated successfully"})
 }
+
+
+export async function getsingleProduct(req,res){
+    try {
+        const {_id}=req.body;
+        const products = await productSchema.find({_id});
+        res.status(200).send(products)
+    } catch (error) {
+        console.log(error);
+        
+    }
+}

@@ -9,7 +9,7 @@ const userSchema=new mongoose.Schema({
     quantity:{type:Number, required:true},
     cname:{type:String, required:true},
     clocation:{type:String, required:true},
-    discount:{type:String}
-
+    discount:{type:Number},
+    
 })
 export default mongoose.model.PRODUCTS||mongoose.model("PRODUCTS",userSchema)
