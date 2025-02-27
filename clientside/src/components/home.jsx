@@ -255,7 +255,7 @@ const CategoryCarousel = ({ title, products }) => {
 
 
 function Home({ useremail, setEMAIL }) {
-  const [user, setUser] = useState({ email: "", username: "" });
+  const [user, setUser] = useState({ email: "", username: "",user_id:"" });
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [minPrice, setMinPrice] = useState('');
@@ -264,18 +264,23 @@ function Home({ useremail, setEMAIL }) {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [scrollY, setScrollY] = useState(0);
+  
+ 
+ const user_id=user.user_id
+ console.log("hiiiiii"+user_id);
+ 
+ 
 
-  const getProducts = async () => {
-    try {
-      const res = await axios.get(`${apiPath()}/getproduct`);
+ const getProducts = async () => {
+  try {
+      const res = await axios.post(`${apiPath()}/getproduct`, { user_id: user.user_id });
       if (res.status === 200) {
-        setProducts(res.data);
+          setProducts(res.data);
       }
-    } catch (error) {
+  } catch (error) {
       console.error("Error fetching products:", error);
-    }
-  };
-
+  }
+};
   const categories = [
     "vegitables",
     "fruits",
@@ -304,7 +309,7 @@ function Home({ useremail, setEMAIL }) {
 
       if (res.status === 200) {
         console.log("User Data:", res.data);
-        setUser({ email: res.data.email, username: res.data.username });
+        setUser({ email: res.data.email, username: res.data.username,user_id:res.data._id });
       }
     } catch (error) {
       console.error("Error:", error.response ? error.response.data : error);
@@ -314,6 +319,15 @@ function Home({ useremail, setEMAIL }) {
       }
     }
   };
+  useEffect(() => {
+    getUser();
+  }, [useremail]);
+  
+  useEffect(() => {
+    if (user.user_id) {
+      getProducts();
+    }
+  }, [user.user_id]);
 
   useEffect(() => {
     getUser();
@@ -356,7 +370,7 @@ function Home({ useremail, setEMAIL }) {
     );
   };
 
-  // Improved filter function that can be applied to any list of products
+  
   const applyFilters = (productsToFilter) => {
     return productsToFilter.filter(product => {
       const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(product.category);
@@ -369,22 +383,21 @@ function Home({ useremail, setEMAIL }) {
     });
   };
 
-  // Apply filters to the full product list
+  
   const filteredProducts = applyFilters(products);
   
-  // Apply filters to each category
+ 
   const filteredProductsByCategory = {};
   categories.forEach(category => {
-    // Get products for this category
+    
     const categoryProducts = products.filter(product => product.category === category);
-    // Apply additional filters (price, search)
+   
     filteredProductsByCategory[category] = applyFilters(categoryProducts);
   });
 
   const handleSearch = (e) => {
     if (e.key === 'Enter' || e.type === 'click') {
-      // Apply the search filter now, it's already being handled by the onChange
-      // This is just to provide a clear action on button click or Enter press
+      
       console.log("Searching for:", searchQuery);
     }
   };
