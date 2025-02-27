@@ -94,3 +94,13 @@ export async function getsingleProduct(req,res){
         
     }
 }
+
+export async function getAllProductAdmin(req,res){
+    try {
+        const products = await productSchema.find();
+        res.status(200).send(products)
+    } catch (error) {
+        console.log(error);
+        
+    }
+}

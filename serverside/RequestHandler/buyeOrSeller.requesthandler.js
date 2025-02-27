@@ -144,3 +144,30 @@ export async function updateUser(req, res) {
         
     }
 }
+
+
+
+export async function getSeller(req, res) {
+    try {
+        
+        const sellers = await userSchema.find({ accounttype: "seller" });
+        
+        res.status(200).send(sellers);
+    } catch (error) {
+        console.error("Error fetching sellers:", error);
+        
+    }
+}
+
+export async function getBuyer(req, res) {
+    try {
+        
+        const buyers = await userSchema.find({ accounttype: "buyer" });
+        
+        res.status(200).send(buyers);
+    } catch (error) {
+        console.error("Error fetching buyers:", error);
+        
+    }
+}
+

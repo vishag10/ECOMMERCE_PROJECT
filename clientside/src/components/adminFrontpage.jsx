@@ -2,12 +2,115 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import apiPath from "./path/apipath";
 import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function AdminHome() {
   const [admin, setUser] = useState({ email: "", username: "", admin_id: "" });
   const [showDropdown, setShowDropdown] = useState(false);
   const [activeTab, setActiveTab] = useState("products");
   const navigate = useNavigate();
+  const [products, setProducts] = useState([]);
+  const [sellers, setSellers] = useState([]);
+  const [buyers, setBuyers] = useState([]);
+  
+  const fetchUsers = async () => {
+    try {
+      const sellerRes = await axios.get(`${apiPath()}/getseller`);
+      
+      if (sellerRes.status === 200) {
+        setSellers(sellerRes.data);
+      }
+  
+      const buyerRes = await axios.get(`${apiPath()}/getbuyer`);
+      
+      if (buyerRes.status === 200) {
+        setBuyers(buyerRes.data);
+      }
+    } catch (err) {
+      console.log("Fetch error:", err);
+    }
+  };
+
+  const handleDelete = async (productId) => {
+    try {
+        const res = await axios.delete(`${apiPath()}/deleteproduct/${productId}`);
+        if (res.status === 200) {
+            const { msg } = res.data;
+            toast.success(msg, {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+            });
+            setTimeout(() => window.location.reload(), 3000);
+        }
+    } catch (error) {
+        console.log(error);
+        toast.error("Failed to delete product. Please try again later.", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+        });
+    }
+  };
+
+  const handleBlockUser = (userId, userType) => {
+    // This is a placeholder function for blocking users
+    // You would implement the actual API call here
+    toast.info(`Blocked ${userType} with ID: ${userId}`, {
+      position: "top-right",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+    });
+    
+    // After successfully blocking, you would typically refresh the user list
+    // fetchUsers();
+  };
+
+  const getProducts = async () => {
+    try {
+        const res = await axios.get(`${apiPath()}/allproductsadmin`);
+        if (res.status === 200) {
+            setProducts(res.data);
+        }
+    } catch (error) {
+        console.error("Error fetching products:", error);
+    }
+  };
+
+  useEffect(() => {
+    getProducts();
+    fetchUsers();
+  }, []); // Added empty dependency array to prevent infinite requests
+  
+  useEffect(() => {
+    console.log("Sellers:", sellers);
+    console.log("Buyers:", buyers);
+  }, [sellers, buyers]);
+  
+  const handleDeleteProduct = async (productId) => {
+    try {
+      // Replace with your actual delete API endpoint
+      const res = await axios.delete(`${apiPath()}/deleteproduct/${productId}`);
+      if (res.status === 200) {
+        // Refresh products after deletion
+        getProducts();
+      }
+    } catch (error) {
+      console.error("Error deleting product:", error);
+    }
+  };
 
   const getAdmin = async () => {
     const token = localStorage.getItem("token");
@@ -50,17 +153,25 @@ function AdminHome() {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    navigate("/adminlogin");
+    toast.error("Logged out!", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "dark",
+        });
+    setTimeout(() =>  navigate("/adminlogin"), 3000);
   };
 
   const toggleDropdown = () => {
     setShowDropdown(!showDropdown);
   };
 
-  console.log(admin);
-
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
+      <ToastContainer />
       {/* Navigation Bar */}
       <nav className="bg-blue-600 text-white p-4 shadow-md">
         <div className="container mx-auto flex justify-between items-center">
@@ -148,8 +259,56 @@ function AdminHome() {
               <h2 className="text-2xl font-semibold mb-4">Products Management</h2>
               <p className="text-gray-600 mb-6">View and manage all products in the system.</p>
               <div className="bg-white rounded-md shadow-md p-6">
-                {/* Products content will go here */}
-                <p className="text-gray-500">Product listing and management interface</p>
+                <h3 className="text-lg font-semibold mb-4">Product Listing</h3>
+                
+                {products && products.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {products.map((product) => (
+                      <div key={product._id} className="border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
+                        <div className="h-48 bg-gray-200 overflow-hidden">
+                          {product.photos && product.photos.length > 0 ? (
+                            <img 
+                              src={product.photos[0]} 
+                              alt={product.product_name} 
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-400">
+                              No Image Available
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="p-4">
+                          <h4 className="font-semibold text-lg mb-1">{product.product_name}</h4>
+                          <div className="text-sm text-gray-600 mb-2">
+                            <span className="font-medium">Category:</span> {product.category}
+                          </div>
+                          <div className="text-sm text-gray-600 mb-2">
+                            <span className="font-medium">Price:</span> ₹{product.price}
+                          </div>
+                          <div className="text-sm text-gray-600 mb-2">
+                            <span className="font-medium">Quantity:</span> {product.quantity} units
+                          </div>
+                          <div className="text-sm text-gray-600 mb-3">
+                            <span className="font-medium">Seller:</span> {product.cname}
+                          </div>
+                          
+                          <button
+                            onClick={() => handleDelete(product.product_id)}
+                            className="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded transition-colors"
+                          >
+                            Delete Product
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    {products ? "No products found" : "Loading products..."}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -158,8 +317,55 @@ function AdminHome() {
               <h2 className="text-2xl font-semibold mb-4">Sellers Management</h2>
               <p className="text-gray-600 mb-6">View and manage all sellers in the system.</p>
               <div className="bg-white rounded-md shadow-md p-6">
-                {/* Sellers content will go here */}
-                <p className="text-gray-500">Seller listing and management interface</p>
+                <h3 className="text-lg font-semibold mb-4">Seller Listing</h3>
+                
+                {sellers && sellers.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {sellers.map((seller) => (
+                      <div key={seller._id} className="border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
+                        <div className="p-6">
+                          <div className="flex items-center mb-4">
+                            <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center text-white text-2xl font-bold mr-4">
+                              {seller.username.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-lg">{seller.username}</h4>
+                              <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                                Seller
+                              </span>
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-2 mb-4">
+                            <div className="flex">
+                              <span className="font-medium w-20">Email:</span>
+                              <span className="text-gray-700">{seller.email}</span>
+                            </div>
+                            <div className="flex">
+                              <span className="font-medium w-20">Phone:</span>
+                              <span className="text-gray-700">{seller.phone}</span>
+                            </div>
+                            <div className="flex">
+                              <span className="font-medium w-20">ID:</span>
+                              <span className="text-gray-700 text-xs truncate">{seller._id}</span>
+                            </div>
+                          </div>
+                          
+                          <button
+                            onClick={() => handleBlockUser(seller._id, "seller")}
+                            className="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded transition-colors"
+                          >
+                            Block Seller
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    {sellers ? "No sellers found" : "Loading sellers..."}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -168,8 +374,55 @@ function AdminHome() {
               <h2 className="text-2xl font-semibold mb-4">Buyers Management</h2>
               <p className="text-gray-600 mb-6">View and manage all buyers in the system.</p>
               <div className="bg-white rounded-md shadow-md p-6">
-                {/* Buyers content will go here */}
-                <p className="text-gray-500">Buyer listing and management interface</p>
+                <h3 className="text-lg font-semibold mb-4">Buyer Listing</h3>
+                
+                {buyers && buyers.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {buyers.map((buyer) => (
+                      <div key={buyer._id} className="border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
+                        <div className="p-6">
+                          <div className="flex items-center mb-4">
+                            <div className="w-16 h-16 bg-purple-500 rounded-full flex items-center justify-center text-white text-2xl font-bold mr-4">
+                              {buyer.username.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-lg">{buyer.username}</h4>
+                              <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                                Buyer
+                              </span>
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-2 mb-4">
+                            <div className="flex">
+                              <span className="font-medium w-20">Email:</span>
+                              <span className="text-gray-700">{buyer.email}</span>
+                            </div>
+                            <div className="flex">
+                              <span className="font-medium w-20">Phone:</span>
+                              <span className="text-gray-700">{buyer.phone}</span>
+                            </div>
+                            <div className="flex">
+                              <span className="font-medium w-20">ID:</span>
+                              <span className="text-gray-700 text-xs truncate">{buyer._id}</span>
+                            </div>
+                          </div>
+                          
+                          <button
+                            onClick={() => handleBlockUser(buyer._id, "buyer")}
+                            className="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded transition-colors"
+                          >
+                            Block Buyer
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    {buyers ? "No buyers found" : "Loading buyers..."}
+                  </div>
+                )}
               </div>
             </div>
           )}

@@ -15,6 +15,7 @@ router.route("/forgot").post(rh.passwordRequest);
 router.route("/adminpasswordchange").put(rh.resetPassword);
 router.route("/login").post(rh.loginUser);
 router.route("/home").get(Auth,rh.Home);
+router.route("/allproductsadmin").get(ph.getAllProductAdmin)
 
 // for buyer or seller
 router.route("/addbuyerseller").post(bh.addbuyer);
@@ -25,6 +26,8 @@ router.route("/sellerforgot").post(bh.passwordRequest);
 router.route("/forgotbuyerseller").post(bh.passwordRequest);
 router.route("/sellerpasswordchange").put(bh.resetPassword);
 router.route("/sellerupdate").put(bh.updateUser);
+router.route("/getseller").get(bh.getSeller);
+router.route("/getbuyer").get(bh.getBuyer);
 
 //product
 router.route("/addproduct").post(ph.addProduct);
