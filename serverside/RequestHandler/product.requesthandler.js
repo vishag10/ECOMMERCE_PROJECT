@@ -14,15 +14,28 @@ export async function addProduct(req,res){
     })
 }
 
-export async function getProducts(req,res){
+export async function getProducts(req, res) {
     try {
-        const products = await productSchema.find();
-        res.status(200).send(products)
+        const { user_id } = req.body;  // Get user_id from request body
+        console.log("Received user_id:", user_id);
+
+        if (!user_id) {
+            return res.status(400).send({ msg: "user_id is required" });
+        }
+
+        // Fetch products where product_id is NOT equal to user_id
+        const products = await productSchema.find({
+            product_id: { $ne: user_id }
+        });
+
+        console.log("Filtered Products:", products);
+        res.status(200).send(products);
     } catch (error) {
-        console.log(error);
-        
+        console.error("Error fetching products:", error);
+        res.status(500).send({ msg: "Server error" });
     }
 }
+
 export async function getProduct(req,res){
     try {
         const {_id}=req.params;
