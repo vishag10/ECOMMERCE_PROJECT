@@ -20,6 +20,8 @@ import Product from './components/product';
 import CartPage from './components/cart';
 import SellerProducts from './components/sellerproducts';
 import ProductEdit from './components/productEdit';
+import PageWishList from './components/wishlist';
+
 
 const ThemeContext = createContext(null);
 
@@ -51,9 +53,13 @@ function App() {
     <Route path="/sellerproducts/:_id" element={<SellerProducts/>} />
     <Route path="/productedit/:_id" element={<ProductEdit/>} />
 
+    <Route path="/wishlist" element={<PageWishList/>} />
+
 
     //Cart
     <Route path="/cart" element={<CartPage/>} />
+
+    
      </Routes>
   </BrowserRouter>
   </ThemeContext.Provider>

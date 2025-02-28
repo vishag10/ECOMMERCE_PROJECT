@@ -13,6 +13,34 @@ function AdminHome() {
   const [products, setProducts] = useState([]);
   const [sellers, setSellers] = useState([]);
   const [buyers, setBuyers] = useState([]);
+
+  const handleBlockUser = async(user_id) => {
+    try {
+      const res = await axios.put(`${apiPath()}/blockuser`, { user_id }); 
+    
+      if (res.status === 200) {
+  
+        setSellers(sellers.map(seller => 
+          seller._id === user_id ? { ...seller, isBlocked: !seller.isBlocked } : seller
+        ));
+        
+        setBuyers(buyers.map(buyer => 
+          buyer._id === user_id ? { ...buyer, isBlocked: !buyer.isBlocked } : buyer
+        ));
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to update user status. Please try again later.", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
+  }
   
   const fetchUsers = async () => {
     try {
@@ -34,84 +62,55 @@ function AdminHome() {
 
   const handleDelete = async (productId) => {
     try {
-        const res = await axios.delete(`${apiPath()}/deleteproduct/${productId}`);
-        if (res.status === 200) {
-            const { msg } = res.data;
-            toast.success(msg, {
-                position: "top-right",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-            });
-            setTimeout(() => window.location.reload(), 3000);
-        }
-    } catch (error) {
-        console.log(error);
-        toast.error("Failed to delete product. Please try again later.", {
-            position: "top-right",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
+      const res = await axios.delete(`${apiPath()}/deleteproduct/${productId}`);
+      if (res.status === 200) {
+        const { msg } = res.data;
+        toast.success(msg, {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
         });
+        setTimeout(() => window.location.reload(), 3000);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to delete product. Please try again later.", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
     }
   };
-
-  const handleBlockUser = (userId, userType) => {
-    // This is a placeholder function for blocking users
-    // You would implement the actual API call here
-    toast.info(`Blocked ${userType} with ID: ${userId}`, {
-      position: "top-right",
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-    });
-    
-    // After successfully blocking, you would typically refresh the user list
-    // fetchUsers();
-  };
-
+  
   const getProducts = async () => {
     try {
-        const res = await axios.get(`${apiPath()}/allproductsadmin`);
-        if (res.status === 200) {
-            setProducts(res.data);
-        }
+      const res = await axios.get(`${apiPath()}/allproductsadmin`);
+      if (res.status === 200) {
+        setProducts(res.data);
+      }
     } catch (error) {
-        console.error("Error fetching products:", error);
+      console.error("Error fetching products:", error);
     }
   };
 
   useEffect(() => {
     getProducts();
     fetchUsers();
-  }, []); // Added empty dependency array to prevent infinite requests
+  }, []); 
   
   useEffect(() => {
     console.log("Sellers:", sellers);
     console.log("Buyers:", buyers);
   }, [sellers, buyers]);
   
-  const handleDeleteProduct = async (productId) => {
-    try {
-      // Replace with your actual delete API endpoint
-      const res = await axios.delete(`${apiPath()}/deleteproduct/${productId}`);
-      if (res.status === 200) {
-        // Refresh products after deletion
-        getProducts();
-      }
-    } catch (error) {
-      console.error("Error deleting product:", error);
-    }
-  };
-
   const getAdmin = async () => {
     const token = localStorage.getItem("token");
     console.log("Token before request:", token);
@@ -154,14 +153,14 @@ function AdminHome() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     toast.error("Logged out!", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          theme: "dark",
-        });
+      position: "top-right",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      theme: "dark",
+    });
     setTimeout(() =>  navigate("/adminlogin"), 3000);
   };
 
@@ -172,8 +171,8 @@ function AdminHome() {
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
       <ToastContainer />
-      {/* Navigation Bar */}
-      <nav className="bg-blue-600 text-white p-4 shadow-md">
+      {/* Fixed Navigation Bar */}
+      <nav className="bg-blue-600 text-white p-4 shadow-md fixed top-0 left-0 right-0 z-10">
         <div className="container mx-auto flex justify-between items-center">
           <div className="font-bold text-xl">Admin Dashboard</div>
           <div className="relative">
@@ -203,10 +202,10 @@ function AdminHome() {
         </div>
       </nav>
 
-      {/* Main Content */}
-      <div className="flex flex-1">
-        {/* Sidebar */}
-        <div className="w-64 bg-white shadow-md">
+      {/* Main Content - Adjusted for fixed navbar */}
+      <div className="flex pt-16 flex-1">
+        {/* Fixed Sidebar */}
+        <div className="w-64 bg-white shadow-md fixed left-0 top-16 bottom-0 overflow-y-auto">
           <div className="p-4 border-b border-gray-200">
             <div className="flex flex-col items-center">
               <img
@@ -252,8 +251,8 @@ function AdminHome() {
           </div>
         </div>
 
-        {/* Content Area */}
-        <div className="flex-1 p-6">
+        {/* Scrollable Content Area - Adjusted to account for fixed sidebar */}
+        <div className="flex-1 ml-64 p-6 overflow-y-auto">
           {activeTab === "products" && (
             <div>
               <h2 className="text-2xl font-semibold mb-4">Products Management</h2>
@@ -266,17 +265,13 @@ function AdminHome() {
                     {products.map((product) => (
                       <div key={product._id} className="border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
                         <div className="h-48 bg-gray-200 overflow-hidden">
-                          {product.photos && product.photos.length > 0 ? (
+                         
                             <img 
                               src={product.photos[0]} 
                               alt={product.product_name} 
                               className="w-full h-full object-cover"
                             />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-400">
-                              No Image Available
-                            </div>
-                          )}
+                          
                         </div>
                         
                         <div className="p-4">
@@ -295,7 +290,7 @@ function AdminHome() {
                           </div>
                           
                           <button
-                            onClick={() => handleDelete(product.product_id)}
+                            onClick={() => handleDelete(product._id)}
                             className="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded transition-colors"
                           >
                             Delete Product
@@ -330,9 +325,16 @@ function AdminHome() {
                             </div>
                             <div>
                               <h4 className="font-semibold text-lg">{seller.username}</h4>
-                              <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                                Seller
-                              </span>
+                              <div>
+                                <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                                  Seller
+                                </span>
+                                {seller.isBlocked && (
+                                  <span className="inline-block bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full ml-1">
+                                    Blocked
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
                           
@@ -352,10 +354,13 @@ function AdminHome() {
                           </div>
                           
                           <button
-                            onClick={() => handleBlockUser(seller._id, "seller")}
-                            className="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded transition-colors"
+                            onClick={() => handleBlockUser(seller._id)}
+                            className={`w-full ${seller.isBlocked 
+                              ? "bg-green-500 hover:bg-green-600" 
+                              : "bg-red-500 hover:bg-red-600"} 
+                              text-white py-2 rounded transition-colors`}
                           >
-                            Block Seller
+                            {seller.isBlocked ? "Unblock Seller" : "Block Seller"}
                           </button>
                         </div>
                       </div>
@@ -387,9 +392,16 @@ function AdminHome() {
                             </div>
                             <div>
                               <h4 className="font-semibold text-lg">{buyer.username}</h4>
-                              <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                                Buyer
-                              </span>
+                              <div>
+                                <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                                  Buyer
+                                </span>
+                                {buyer.isBlocked && (
+                                  <span className="inline-block bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full ml-1">
+                                    Blocked
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
                           
@@ -409,10 +421,13 @@ function AdminHome() {
                           </div>
                           
                           <button
-                            onClick={() => handleBlockUser(buyer._id, "buyer")}
-                            className="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded transition-colors"
+                            onClick={() => handleBlockUser(buyer._id)}
+                            className={`w-full ${buyer.isBlocked 
+                              ? "bg-green-500 hover:bg-green-600" 
+                              : "bg-red-500 hover:bg-red-600"} 
+                              text-white py-2 rounded transition-colors`}
                           >
-                            Block Buyer
+                            {buyer.isBlocked ? "Unblock Buyer" : "Block Buyer"}
                           </button>
                         </div>
                       </div>

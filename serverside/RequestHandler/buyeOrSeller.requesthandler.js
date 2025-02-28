@@ -51,6 +51,10 @@ export async function loginbuyer(req, res) {
     if (!sucess)
         return res.status(404).send({ msg: "incorrept password" })
 
+    if (user.block) {
+        return res.status(404).send({ msg: "your account was been blocked by admin" })
+    }
+
     const token = await sign({ userID: user._id }, process.env.JWT_KEY, { expiresIn: "24h" })
     res.status(200).send({ msg: "successfully loged in ", token })
 }
@@ -62,7 +66,7 @@ export async function Homebuyer(req, res) {
         console.log(req.user);
         const _id = req.user.userID;
         const user = await userSchema.findOne({ _id });
-        res.status(200).send({ username: user.username, email: user.email,accounttype: user.accounttype,_id: user._id });
+        res.status(200).send({ username: user.username, email: user.email, accounttype: user.accounttype, _id: user._id });
 
     } catch (error) {
         res.status(400).send({ error })
@@ -135,13 +139,13 @@ export async function resetPassword(req, res) {
 }
 export async function updateUser(req, res) {
     try {
-        const {email,phone,username}=req.body;
+        const { email, phone, username } = req.body;
         await userSchema.updateOne({ email }, { $set: { email, phone, username } });
-        res.status(200).send({msg: "User updated successfully"});
-        
+        res.status(200).send({ msg: "User updated successfully" });
+
     } catch (error) {
         console.log(error);
-        
+
     }
 }
 
@@ -149,25 +153,42 @@ export async function updateUser(req, res) {
 
 export async function getSeller(req, res) {
     try {
-        
+
         const sellers = await userSchema.find({ accounttype: "seller" });
-        
+
         res.status(200).send(sellers);
     } catch (error) {
         console.error("Error fetching sellers:", error);
-        
+
     }
 }
 
 export async function getBuyer(req, res) {
     try {
-        
+
         const buyers = await userSchema.find({ accounttype: "buyer" });
-        
+
         res.status(200).send(buyers);
     } catch (error) {
         console.error("Error fetching buyers:", error);
-        
+
     }
 }
 
+export async function blockUser(req, res) {
+    try {
+        const { user_id } = req.body;
+        const _id=user_id;
+        await userSchema.findByIdAndUpdate(
+           _id ,
+            [{ $set: { block: { $not: "$block" } } }],
+            { new: true }
+        );
+        res.status(200).send({ msg: "User blocked successfully" });
+
+
+    } catch (error) {
+        console.log(error);
+
+    }
+}

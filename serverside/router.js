@@ -16,6 +16,8 @@ router.route("/adminpasswordchange").put(rh.resetPassword);
 router.route("/login").post(rh.loginUser);
 router.route("/home").get(Auth,rh.Home);
 router.route("/allproductsadmin").get(ph.getAllProductAdmin)
+router.route("/blockuser").put(bh.blockUser)
+
 
 // for buyer or seller
 router.route("/addbuyerseller").post(bh.addbuyer);
