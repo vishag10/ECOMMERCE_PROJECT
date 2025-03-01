@@ -17,7 +17,7 @@ function Product() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const carouselRef = useRef(null);
   const autoPlayRef = useRef(null);
-  const autoPlayInterval = 3000; // Time in ms between slides
+  const autoPlayInterval = 3000; 
 
   const getproduct = async () => {
     try {
@@ -69,7 +69,7 @@ function Product() {
     }
   }, [user, product]);
 
-  // Auto-play carousel functionality
+ 
   useEffect(() => {
     if (!product.photos || product.photos.length <= 1) return;
 
@@ -83,7 +83,7 @@ function Product() {
 
     play();
 
-    // Cleanup interval on unmount
+   
     return () => {
       if (autoPlayRef.current) {
         clearInterval(autoPlayRef.current);
@@ -91,7 +91,6 @@ function Product() {
     };
   }, [product.photos]);
 
-  // Reset timer when manually changing slides
   const resetTimer = () => {
     if (autoPlayRef.current) {
       clearInterval(autoPlayRef.current);
@@ -139,7 +138,7 @@ function Product() {
   const [quantity, setQuantity] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState(0);
 
-  // Mock photos array in case product doesn't have photos
+  
   const mockPhotos = [
     "https://www.longines.com/media/catalog/product/cache/8db0cbef53b094d206272ae26deca8a4/l/3/l3.720.4.92.6_0001.png",
     "https://www.longines.com/media/catalog/product/cache/8db0cbef53b094d206272ae26deca8a4/l/3/l3.720.4.92.6_0002.png",
@@ -147,21 +146,21 @@ function Product() {
     "https://www.longines.com/media/catalog/product/cache/8db0cbef53b094d206272ae26deca8a4/l/3/l3.720.4.92.6_0004.png"
   ];
 
-  // Use product photos or mock photos if none exist
+  
   const displayPhotos = product.photos && product.photos.length > 0 ? product.photos : mockPhotos;
 
-  // Generate variants based on product photos or mock photos
+
   const variants = displayPhotos.map((photo, index) => ({
     id: index + 1,
     img: photo,
-    color: ["Blue", "Silver", "Green", "Black"][index % 4] // Cycle through colors
+    color: ["Blue", "Silver", "Green", "Black"][index % 4] 
   }));
 
-  // Handle variant selection - change main image to match the selected variant
+  
   const handleVariantSelect = (index) => {
     setSelectedVariant(index);
-    setCurrentImageIndex(index); // Change the main carousel image
-    resetTimer(); // Reset the auto-play timer
+    setCurrentImageIndex(index); 
+    resetTimer();
   };
 
   const handleQuantityChange = (increment) => {
@@ -172,14 +171,14 @@ function Product() {
     try {
       const res = await axios.post(`${apiPath()}/addcart`, cart);
       toast.success(res.data.msg, { position: "top-right", autoClose: 3000, theme: "dark" });
-      setIsAddedToCart(true); // Update state to reflect item is added to cart
+      setIsAddedToCart(true); 
     } catch (error) {
       console.log(error);
     }
   };
 
   const handleGoToCart = () => {
-    navigate("/cart"); // Navigate to cart page
+    navigate("/cart"); 
   };
 
   const checkCartStatus = async () => {
@@ -203,7 +202,7 @@ function Product() {
     }
   }, [user, product]);
 
-  // Calculate discounted price if discount exists
+ 
   const calculateDiscountedPrice = () => {
     if (product.discount && product.discount > 0) {
       const discountAmount = (product.price * product.discount) / 100;
@@ -282,7 +281,7 @@ function Product() {
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto p-4 lg:p-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 bg-white rounded-2xl shadow-sm p-4 lg:p-8">
-            {/* Product Images Carousel */}
+            
             <div className="relative">
               <div className="sticky top-8 space-y-4">
                 <div className="relative overflow-hidden rounded-xl shadow-lg" ref={carouselRef}>
@@ -303,7 +302,6 @@ function Product() {
                     ))}
                   </div>
 
-                  {/* Navigation arrows */}
                   <button
                     onClick={handlePrevSlide}
                     className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full shadow-md hover:bg-white transition-colors focus:outline-none"
@@ -321,7 +319,7 @@ function Product() {
                   </button>
                 </div>
 
-                {/* Carousel indicators */}
+                
                 <div className="flex justify-center gap-2 mt-2">
                   {displayPhotos.map((_, index) => (
                     <button
@@ -342,7 +340,7 @@ function Product() {
               </div>
             </div>
 
-            {/* Product Details */}
+           
             <div className="space-y-6 lg:space-y-8">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
@@ -354,7 +352,7 @@ function Product() {
                 </p>
               </div>
 
-              {/* Available Variations - These now directly change the main image */}
+              
               <div className="space-y-3">
                 <h2 className="text-lg font-semibold text-gray-900">Available Variations</h2>
                 <div className="flex flex-wrap gap-4">
@@ -378,7 +376,7 @@ function Product() {
                 </div>
               </div>
 
-              {/* Quantity Selector */}
+             
               <div className="space-y-3">
                 <h2 className="text-lg font-semibold text-gray-900">Quantity</h2>
                 <div className="flex items-center gap-4">
@@ -398,7 +396,7 @@ function Product() {
                 </div>
               </div>
 
-              {/* Price and Buttons */}
+              
               <div className="space-y-4 pt-6">
                 <div className="flex items-baseline gap-2">
                   {product.discount && product.discount > 0 ? (

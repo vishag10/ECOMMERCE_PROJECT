@@ -137,7 +137,7 @@ function SellItem() {
             />
           </div>
 
-          {/* Image Upload */}
+          
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700">Upload Images</label>
             <div className="flex items-center gap-3 mt-1">
@@ -157,7 +157,7 @@ function SellItem() {
               />
             </div>
 
-            {/* Display Selected Images */}
+            
             <div className="mt-3 grid grid-cols-4 gap-2">
               {product.photos.map((photo, index) => (
                 <img key={index} src={photo} alt={`Preview ${index}`} className="w-20 h-20 object-cover rounded-md" />

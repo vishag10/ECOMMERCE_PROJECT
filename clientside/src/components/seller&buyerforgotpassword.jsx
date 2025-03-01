@@ -40,11 +40,11 @@ function BuyerForget() {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
-  // Parallax effect values
+  
   const x = useTransform(mouseX, [0, window.innerWidth], [-5, 5]);
   const y = useTransform(mouseY, [0, window.innerHeight], [-5, 5]);
 
-  // Handle mouse movement for parallax
+  
   const handleMouseMove = (e) => {
     const rect = imageRef.current?.getBoundingClientRect();
     if (rect) {
@@ -121,7 +121,7 @@ function BuyerForget() {
           </motion.div>
         </motion.div>
 
-        {/* Right Side - Form */}
+        
         <div className="w-full md:w-1/2 bg-white p-6 md:p-14">
           <motion.div 
             className="max-w-md mx-auto"

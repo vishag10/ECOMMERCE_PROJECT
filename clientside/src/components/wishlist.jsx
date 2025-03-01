@@ -52,7 +52,7 @@ function PageWishList(){
         }
       ]);
     
-      // Animation classes
+      
       const fadeInClasses = "opacity-0 animate-fadeIn";
       
       const removeFromWishlist = (id) => {
@@ -172,13 +172,13 @@ function PageWishList(){
                   </nav>
 
                   <main className="container mx-auto px-4 py-12">
-        {/* Page title */}
+        
         <div className="text-center mb-12">
           <h1 className="text-3xl font-bold mb-2">Favorites</h1>
           <p className="text-gray-500">Items you've added to your wishlist</p>
         </div>
 
-        {/* Wishlist items */}
+       
         {wishlistItems.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {wishlistItems.map((item, index) => (
@@ -187,7 +187,7 @@ function PageWishList(){
                 className="bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:shadow-xl hover:translate-y-1 animate-fadeIn"
                 style={{ animationDelay: `${index * 150}ms` }}
               >
-                {/* Product image */}
+                
                 <div className="relative h-64 overflow-hidden">
                   <img 
                     src={item.photos[0]} 
@@ -199,7 +199,7 @@ function PageWishList(){
                   </button>
                 </div>
                 
-                {/* Product info */}
+               
                 <div className="p-4">
                   <div className="uppercase text-xs text-gray-500 tracking-wider mb-1">{item.category}</div>
                   <h3 className="font-bold text-lg mb-2 capitalize">{item.product_name}</h3>

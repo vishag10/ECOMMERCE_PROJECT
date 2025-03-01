@@ -43,11 +43,11 @@ function AdminResetPassword() {
         }
     }
 
-    // Parallax effect values
+    
     const x = useTransform(mouseX, [0, window.innerWidth], [-5, 5]);
     const y = useTransform(mouseY, [0, window.innerHeight], [-5, 5]);
 
-    // Handle mouse movement for parallax
+    
     const handleMouseMove = (e) => {
         const rect = imageRef.current?.getBoundingClientRect();
         if (rect) {
@@ -63,7 +63,7 @@ function AdminResetPassword() {
         <div className="min-h-screen w-full flex items-center justify-center bg-gray-50 p-6">
             <ToastContainer />
             <div className="w-full max-w-6xl flex flex-col md:flex-row rounded-xl shadow-lg bg-white overflow-hidden">
-                {/* Left Side - Image */}
+                
                 <motion.div
                     className="hidden md:block md:w-1/2 relative overflow-hidden min-h-[500px]"
                     ref={imageRef}
@@ -124,7 +124,7 @@ function AdminResetPassword() {
                     </motion.div>
                 </motion.div>
 
-                {/* Right Side - Form */}
+               
                 <div className="w-full md:w-1/2 bg-white p-6 md:p-14">
                     <motion.div
                         className="max-w-md mx-auto"

@@ -354,7 +354,7 @@ function CartPage() {
             )}
           </div>
 
-          {/* 💰 Price Summary */}
+          
           <div className="w-full lg:w-1/4 bg-white p-6 shadow-lg">
             <h2 className="text-lg font-medium mb-4">PRICE DETAILS</h2>
             <PriceSummary />

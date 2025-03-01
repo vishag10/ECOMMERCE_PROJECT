@@ -171,7 +171,7 @@ function AdminHome() {
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
       <ToastContainer />
-      {/* Fixed Navigation Bar */}
+      
       <nav className="bg-blue-600 text-white p-4 shadow-md fixed top-0 left-0 right-0 z-10">
         <div className="container mx-auto flex justify-between items-center">
           <div className="font-bold text-xl">Admin Dashboard</div>
@@ -202,9 +202,9 @@ function AdminHome() {
         </div>
       </nav>
 
-      {/* Main Content - Adjusted for fixed navbar */}
+      
       <div className="flex pt-16 flex-1">
-        {/* Fixed Sidebar */}
+       
         <div className="w-64 bg-white shadow-md fixed left-0 top-16 bottom-0 overflow-y-auto">
           <div className="p-4 border-b border-gray-200">
             <div className="flex flex-col items-center">
@@ -251,7 +251,7 @@ function AdminHome() {
           </div>
         </div>
 
-        {/* Scrollable Content Area - Adjusted to account for fixed sidebar */}
+       
         <div className="flex-1 ml-64 p-6 overflow-y-auto">
           {activeTab === "products" && (
             <div>
