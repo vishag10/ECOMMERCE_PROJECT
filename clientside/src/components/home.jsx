@@ -31,6 +31,11 @@ const ProductCard = ({ product }) => {
               className={`h-full w-full object-cover object-center transition-all duration-700 ease-in-out
                 ${isHovered ? 'scale-110' : 'scale-100'}`}
             />
+            {product.discount && (
+              <div className="absolute top-0 left-0 bg-red-500 text-white px-3 py-1 m-2 rounded-full shadow-lg transform -rotate-12 font-medium text-sm">
+                {product.discount}% OFF
+              </div>
+            )}
             <button className="absolute top-4 right-4 p-2 rounded-full bg-white hover:bg-gray-100 transition-colors">
               <Heart size={20} className="text-gray-800" />
             </button>
