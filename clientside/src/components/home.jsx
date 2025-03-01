@@ -36,9 +36,9 @@ const ProductCard = ({ product }) => {
                 {product.discount}% OFF
               </div>
             )}
-           <Link><button className="absolute top-4 right-4 p-2 rounded-full bg-white hover:bg-gray-100 transition-colors">
+            {/* <button className="absolute top-4 right-4 p-2 rounded-full bg-white hover:bg-gray-100 transition-colors">
               <Heart size={20} className="text-gray-800" />
-            </button></Link> 
+            </button> */}
           </div>
           <div className="mt-3 space-y-1">
             <div className="flex justify-between">
@@ -118,7 +118,7 @@ const MainCarousel = () => {
         ))}
       </div>
 
-      
+      {/* Navigation Arrows */}
       <button 
         className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-white/50 hover:bg-white/80 p-2 rounded-full transition-colors"
         onClick={goToPrevSlide}
@@ -132,7 +132,7 @@ const MainCarousel = () => {
         <ChevronRight size={24} />
       </button>
 
-      
+      {/* Dots Indicator */}
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
         {carouselImages.map((_, index) => (
           <button
@@ -456,7 +456,7 @@ function Home({ useremail, setEMAIL }) {
               Search
             </button>
           </div>
-         <Link to={"/wishlist"}><Heart className="w-6 h-6 cursor-pointer hover:text-gray-600" /></Link> 
+         {/* <Link to={"/wishlist"}><Heart className="w-6 h-6 cursor-pointer hover:text-gray-600" /></Link>  */}
           <Link to={"/cart"}> <ShoppingBag className="w-6 h-6 cursor-pointer hover:text-gray-600" /></Link>
 
           {user.username ? (
@@ -497,7 +497,7 @@ function Home({ useremail, setEMAIL }) {
       </nav>
 
       <div className="flex min-h-screen bg-white pt-24 flex-col">
-        
+        {/* Left side filter icon */}
         <button
           onClick={() => setIsFilterOpen(!isFilterOpen)}
           className="fixed left-4 top-29 z-50 bg-white p-3 rounded-full shadow-lg hover:bg-gray-100 transition-all duration-300"
@@ -506,7 +506,7 @@ function Home({ useremail, setEMAIL }) {
           <Filter size={20} />
         </button>
 
-        
+        {/* Filter dropdown */}
         <div 
           className={`fixed left-0 right-0 bg-white shadow-lg z-40 transition-all duration-500 ease-in-out overflow-hidden
             ${isFilterOpen ? 'top-24 max-h-screen' : 'top-24 max-h-0'}`}
@@ -566,12 +566,12 @@ function Home({ useremail, setEMAIL }) {
               </div>
             </div>
 
-           
+            {/* Active filters display */}
             <div className="mt-6 max-w-4xl mx-auto">
               <div className="flex flex-wrap gap-2 items-center">
                 <span className="text-sm text-gray-500">Active filters:</span>
                 
-               
+                {/* Category filters */}
                 {selectedCategories.map(category => (
                   <span key={category} className="bg-gray-100 px-3 py-1 rounded-full text-sm flex items-center">
                     {category}
@@ -584,7 +584,7 @@ function Home({ useremail, setEMAIL }) {
                   </span>
                 ))}
                 
-               
+                {/* Price filter */}
                 {(minPrice || maxPrice) && (
                   <span className="bg-gray-100 px-3 py-1 rounded-full text-sm flex items-center">
                     Price: {minPrice || '0'} - {maxPrice || '∞'}
@@ -600,7 +600,7 @@ function Home({ useremail, setEMAIL }) {
                   </span>
                 )}
                 
-                
+                {/* Search filter */}
                 {searchQuery && (
                   <span className="bg-gray-100 px-3 py-1 rounded-full text-sm flex items-center">
                     Search: {searchQuery}
@@ -613,7 +613,7 @@ function Home({ useremail, setEMAIL }) {
                   </span>
                 )}
                 
-                
+                {/* Clear all */}
                 {(selectedCategories.length > 0 || minPrice || maxPrice || searchQuery) && (
                   <button 
                     onClick={() => {
@@ -632,14 +632,14 @@ function Home({ useremail, setEMAIL }) {
           </div>
         </div>
 
-        
+        {/* Main Image Carousel */}
         <div className="mt-10 mb-10  ">
           <MainCarousel />
         </div>
 
-        
+        {/* Category Product Carousels - now using filtered products */}
         <div className="w-4/5 mx-auto space-y-10">
-          
+          {/* Show filter result summary if filters are active */}
           {(selectedCategories.length > 0 || minPrice || maxPrice || searchQuery) && (
             <div className="text-sm text-gray-500 mb-4">
               Showing {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'} 
@@ -649,7 +649,7 @@ function Home({ useremail, setEMAIL }) {
             </div>
           )}
 
-          
+          {/* Display Filtered Category Carousels */}
           {categories.map(category => (
             <div key={category}>
               {filteredProductsByCategory[category]?.length > 0 && (
@@ -661,6 +661,7 @@ function Home({ useremail, setEMAIL }) {
             </div>
           ))}
 
+          {/* Display "All Products" grid if no categories have products after filtering */}
           {categories.every(category => !filteredProductsByCategory[category]?.length) && filteredProducts.length > 0 && (
             <div className="mt-10">
               <h2 className="text-xl font-bold mb-6 text-gray-900">All Products</h2>
@@ -677,7 +678,7 @@ function Home({ useremail, setEMAIL }) {
             </div>
           )}
 
-         
+          {/* No Results Message */}
           {filteredProducts.length === 0 && (
             <div className="text-center py-16">
               <p className="text-xl text-gray-500 mb-4">No products found matching your filters.</p>
@@ -697,7 +698,7 @@ function Home({ useremail, setEMAIL }) {
         </div>
       </div>
 
-   
+      {/* CSS for hiding scrollbars but allowing scroll functionality */}
       <style jsx>{`
         .hide-scrollbar {
           -ms-overflow-style: none;
@@ -708,6 +709,7 @@ function Home({ useremail, setEMAIL }) {
         }
       `}</style>
 
+       {/* Footer */}
        <footer className="bg-black text-white py-12 mt-16">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">

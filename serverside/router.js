@@ -4,6 +4,7 @@ import * as bh from "./RequestHandler/buyeOrSeller.requesthandler.js"
 import * as ph from "./RequestHandler/product.requesthandler.js"
 import * as ah from "./RequestHandler/address.requesthandler.js"
 import * as ch from "./RequestHandler/kart.requesthandler.js"
+import * as wh from "./RequestHandler/wishlist.requesthandler.js"
 
 import Auth from "./middleware/auth.js";
 
@@ -50,6 +51,9 @@ router.route("/addcart").post(ch.addToCart);
 router.route("/getcartcheck/:user_id").get(ch.checkCartitems);
 router.route("/getcart").get(ch.getCart);
 router.route("/deletecart/:id").delete(ch.removeCartItem);
+
+//wishlist
+router.route("/addtowishlist").post(wh.addProductToWishlist);
 
 
 export default router;
