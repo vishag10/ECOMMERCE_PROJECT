@@ -1,5 +1,5 @@
 import "./css/home.css";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef,useCallback,useMemo } from "react";
 import { Search, Heart, ShoppingBag, Filter, X, ChevronLeft, ChevronRight } from "lucide-react";
 import logo from "../assets/prada-logo-svgrepo-com.svg";
 import { Link, useNavigate } from "react-router-dom";
@@ -13,7 +13,7 @@ import carousel3 from "../assets/3.png"
 
 
 
-const ProductCard = ({ product }) => {
+const ProductCard = React.memo(({ product }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -30,15 +30,13 @@ const ProductCard = ({ product }) => {
               alt="Product"
               className={`h-full w-full object-cover object-center transition-all duration-700 ease-in-out
                 ${isHovered ? 'scale-110' : 'scale-100'}`}
+              loading="lazy" // Added lazy loading
             />
             {product.discount && (
               <div className="absolute top-0 left-0 bg-red-500 text-white px-3 py-1 m-2 rounded-full shadow-lg transform -rotate-12 font-medium text-sm">
                 {product.discount}% OFF
               </div>
             )}
-            {/* <button className="absolute top-4 right-4 p-2 rounded-full bg-white hover:bg-gray-100 transition-colors">
-              <Heart size={20} className="text-gray-800" />
-            </button> */}
           </div>
           <div className="mt-3 space-y-1">
             <div className="flex justify-between">
@@ -51,26 +49,23 @@ const ProductCard = ({ product }) => {
       </div>
     </Link>
   );
-};
+});
 
-
-const MainCarousel = () => {
+const MainCarousel = React.memo(() => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const timeoutRef = useRef(null);
-  
   
   const carouselImages = [
     carousel1,
     carousel2,
     carousel3,
-    
   ];
 
-  const resetTimeout = () => {
+  const resetTimeout = useCallback(() => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
-  };
+  }, []);
 
   useEffect(() => {
     resetTimeout();
@@ -83,23 +78,23 @@ const MainCarousel = () => {
     return () => {
       resetTimeout();
     };
-  }, [currentSlide, carouselImages.length]);
+  }, [currentSlide, carouselImages.length, resetTimeout]);
 
-  const goToSlide = (index) => {
+  const goToSlide = useCallback((index) => {
     setCurrentSlide(index);
-  };
+  }, []);
 
-  const goToPrevSlide = () => {
+  const goToPrevSlide = useCallback(() => {
     setCurrentSlide((prevSlide) => 
       prevSlide === 0 ? carouselImages.length - 1 : prevSlide - 1
     );
-  };
+  }, [carouselImages.length]);
 
-  const goToNextSlide = () => {
+  const goToNextSlide = useCallback(() => {
     setCurrentSlide((prevSlide) => 
       prevSlide === carouselImages.length - 1 ? 0 : prevSlide + 1
     );
-  };
+  }, [carouselImages.length]);
 
   return (
     <div className="relative w-4/5 mx-auto h-48 md:h-56 lg:h-72 overflow-hidden rounded-lg shadow-md">
@@ -112,13 +107,13 @@ const MainCarousel = () => {
             <img 
               src={image} 
               alt={`Slide ${index + 1}`} 
-              className="w-full h-full object-cover" 
+              className="w-full h-full object-cover"
+              loading="lazy" // Added lazy loading 
             />
           </div>
         ))}
       </div>
 
-      {/* Navigation Arrows */}
       <button 
         className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-white/50 hover:bg-white/80 p-2 rounded-full transition-colors"
         onClick={goToPrevSlide}
@@ -132,7 +127,6 @@ const MainCarousel = () => {
         <ChevronRight size={24} />
       </button>
 
-      {/* Dots Indicator */}
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
         {carouselImages.map((_, index) => (
           <button
@@ -146,43 +140,40 @@ const MainCarousel = () => {
       </div>
     </div>
   );
-};
+});
 
 
-const CategoryCarousel = ({ title, products }) => {
+const CategoryCarousel = React.memo(({ title, products }) => {
   const [scrollPosition, setScrollPosition] = useState(0);
   const carouselRef = useRef(null);
   const timeoutRef = useRef(null);
   
-  const scrollLeft = () => {
+  const scrollLeft = useCallback(() => {
     if (carouselRef.current) {
       carouselRef.current.scrollBy({ left: -300, behavior: 'smooth' });
     }
-  };
+  }, []);
   
-  const scrollRight = () => {
+  const scrollRight = useCallback(() => {
     if (carouselRef.current) {
       carouselRef.current.scrollBy({ left: 300, behavior: 'smooth' });
     }
-  };
-
+  }, []);
 
   useEffect(() => {
     const carousel = carouselRef.current;
     if (!carousel) return;
     
     const autoScroll = () => {
-      if (
-        carousel.scrollLeft + carousel.clientWidth >= carousel.scrollWidth - 10
-      ) {
-        
+      if (carousel.scrollLeft + carousel.clientWidth >= carousel.scrollWidth - 10) {
         carousel.scrollTo({ left: 0, behavior: 'smooth' });
       } else {
         carousel.scrollBy({ left: 300, behavior: 'smooth' });
       }
     };
     
-    timeoutRef.current = setInterval(autoScroll, 8000);
+    // Reduced frequency of auto-scroll from 8000ms to 10000ms
+    timeoutRef.current = setInterval(autoScroll, 10000);
     
     return () => {
       if (timeoutRef.current) {
@@ -191,20 +182,30 @@ const CategoryCarousel = ({ title, products }) => {
     };
   }, []);
   
-  
-  const handleScroll = () => {
+  const handleScroll = useCallback(() => {
     if (carouselRef.current) {
       setScrollPosition(carouselRef.current.scrollLeft);
     }
-  };
+  }, []);
   
   useEffect(() => {
     const carousel = carouselRef.current;
     if (carousel) {
-      carousel.addEventListener('scroll', handleScroll);
-      return () => carousel.removeEventListener('scroll', handleScroll);
+      // Throttle the scroll event
+      let throttleTimer;
+      const throttledScrollHandler = () => {
+        if (!throttleTimer) {
+          throttleTimer = setTimeout(() => {
+            handleScroll();
+            throttleTimer = null;
+          }, 100);
+        }
+      };
+      
+      carousel.addEventListener('scroll', throttledScrollHandler);
+      return () => carousel.removeEventListener('scroll', throttledScrollHandler);
     }
-  }, []);
+  }, [handleScroll]);
   
   const showLeftArrow = scrollPosition > 20;
   const showRightArrow = carouselRef.current 
@@ -212,6 +213,9 @@ const CategoryCarousel = ({ title, products }) => {
     : true;
     
   if (products.length === 0) return null;
+  
+  // Limit number of products to display for better performance
+  const displayProducts = products.slice(0, 10);
   
   return (
     <div className="mb-12">
@@ -248,7 +252,7 @@ const CategoryCarousel = ({ title, products }) => {
         className="flex overflow-x-auto pb-4 gap-6 hide-scrollbar"
         style={{ scrollBehavior: 'smooth' }}
       >
-        {products.map((product) => (
+        {displayProducts.map((product) => (
           <div key={product._id} className="w-64 flex-shrink-0">
             <ProductCard product={product} />
           </div>
@@ -256,7 +260,7 @@ const CategoryCarousel = ({ title, products }) => {
       </div>
     </div>
   );
-};
+});
 
 
 function Home({ useremail, setEMAIL }) {
@@ -276,16 +280,17 @@ function Home({ useremail, setEMAIL }) {
  
  
 
- const getProducts = async () => {
+ const getProducts = useCallback(async () => {
   try {
-      const res = await axios.post(`${apiPath()}/getproduct`, { user_id: user.user_id });
-      if (res.status === 200) {
-          setProducts(res.data);
-      }
+    const res = await axios.post(`${apiPath()}/getproduct`, { user_id: user.user_id });
+    if (res.status === 200) {
+      setProducts(res.data);
+    }
   } catch (error) {
-      console.error("Error fetching products:", error);
+    console.error("Error fetching products:", error);
   }
-};
+}, [user.user_id]);
+
   const categories = [
     "vegitables",
     "fruits",
@@ -296,9 +301,8 @@ function Home({ useremail, setEMAIL }) {
 
   const navigate = useNavigate();
 
-  const getUser = async () => {
+  const getUser = useCallback(async () => {
     const token = localStorage.getItem("token");
-    console.log("Token before request:", token);
 
     if (!token) {
       setTimeout(() => navigate("/buyerorsellerlogin"), 3000);
@@ -313,42 +317,46 @@ function Home({ useremail, setEMAIL }) {
       });
 
       if (res.status === 200) {
-        console.log("User Data:", res.data);
-        setUser({ email: res.data.email, username: res.data.username,user_id:res.data._id });
+        setUser({ email: res.data.email, username: res.data.username, user_id: res.data._id });
       }
     } catch (error) {
-      console.error("Error:", error.response ? error.response.data : error);
       if (error.response?.data?.msg === "Login time expired please login again") {
         localStorage.removeItem("token");
         setTimeout(() => navigate("/buyerorsellerlogin"), 3000);
       }
     }
-  };
+  }, [navigate]);
+  
   useEffect(() => {
     getUser();
-  }, [useremail]);
+  }, [useremail, getUser]);
   
   useEffect(() => {
     if (user.user_id) {
       getProducts();
     }
-  }, [user.user_id]);
+  }, [user.user_id, getProducts]);
 
   useEffect(() => {
-    getUser();
-    getProducts();
-    
+    // Throttle scroll events
+    let scrollThrottleTimer;
     const handleScroll = () => {
-      setScrollY(window.scrollY);
+      if (!scrollThrottleTimer) {
+        scrollThrottleTimer = setTimeout(() => {
+          setScrollY(window.scrollY);
+          scrollThrottleTimer = null;
+        }, 100); // Throttle to once every 100ms
+      }
     };
     
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      clearTimeout(scrollThrottleTimer);
     };
-  }, [useremail]);
+  }, []);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     localStorage.removeItem("token");
     localStorage.removeItem("useremail");
 
@@ -363,49 +371,55 @@ function Home({ useremail, setEMAIL }) {
     });
 
     setUser({ email: "", username: "" });
-
     setTimeout(() => navigate("/buyerorsellerlogin"), 3000);
-  };
+  }, [navigate]);
 
-  const handleCategoryChange = (category) => {
+  const handleCategoryChange = useCallback((category) => {
     setSelectedCategories(prev =>
       prev.includes(category)
         ? prev.filter(c => c !== category)
         : [...prev, category]
     );
-  };
+  }, []);
 
   
-  const applyFilters = (productsToFilter) => {
+  const applyFilters = useCallback((productsToFilter) => {
     return productsToFilter.filter(product => {
       const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(product.category);
       const matchesPrice = (!minPrice || product.price >= Number(minPrice)) && 
-                           (!maxPrice || product.price <= Number(maxPrice));
-      const matchesSearch = searchQuery ? 
-        product.product_name.toLowerCase().includes(searchQuery.toLowerCase()) : true;
+                         (!maxPrice || product.price <= Number(maxPrice));
+      const matchesSearch = !searchQuery || 
+        product.product_name.toLowerCase().includes(searchQuery.toLowerCase());
       
       return matchesCategory && matchesPrice && matchesSearch;
     });
-  };
+  }, [selectedCategories, minPrice, maxPrice, searchQuery]);
 
   
-  const filteredProducts = applyFilters(products);
+  const filteredProducts = useMemo(() => applyFilters(products), 
+    [products, applyFilters]);
   
  
-  const filteredProductsByCategory = {};
-  categories.forEach(category => {
-    
-    const categoryProducts = products.filter(product => product.category === category);
-   
-    filteredProductsByCategory[category] = applyFilters(categoryProducts);
-  });
+    const filteredProductsByCategory = useMemo(() => {
+      const result = {};
+      ["vegitables", "fruits", "fastfood", "biscuits", "grains"].forEach(category => {
+        const categoryProducts = products.filter(product => product.category === category);
+        result[category] = applyFilters(categoryProducts);
+      });
+      return result;
+    }, [products, applyFilters]);
 
-  const handleSearch = (e) => {
-    if (e.key === 'Enter' || e.type === 'click') {
-      
-      console.log("Searching for:", searchQuery);
-    }
-  };
+    const handleSearch = useCallback((e) => {
+      if (e.key === 'Enter' || e.type === 'click') {
+        console.log("Searching for:", searchQuery);
+      }
+    }, [searchQuery]);
+
+    const visibleCategories = useMemo(() => 
+      Object.keys(filteredProductsByCategory).filter(
+        category => filteredProductsByCategory[category].length > 0
+      ).slice(0, 3), // Limit to 3 categories at a time
+    [filteredProductsByCategory]);
 
   return (
     <>
@@ -769,4 +783,4 @@ function Home({ useremail, setEMAIL }) {
   );
 }
 
-export default Home;
+export default React.memo(Home);
