@@ -348,7 +348,7 @@ function Product() {
                 </div>
                 <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">{product.product_name}</h1>
                 <p className="text-gray-600 text-lg">
-                  {product.description || "CONQUEST, L3.720.4.92.6, Automatic watch, ∅ 38.00 mm, Stainless steel. Date, Self-winding mechanical movement beating at 25'200 vibrations per hour"}
+                  {product.description || "Fresh and organic."}
                 </p>
               </div>
 
