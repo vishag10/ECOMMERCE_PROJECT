@@ -1,5 +1,5 @@
 import "./css/home.css";
-import React, { useState, useEffect, useRef,useCallback,useMemo } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Search, Heart, ShoppingBag, Filter, X, ChevronLeft, ChevronRight } from "lucide-react";
 import logo from "../assets/prada-logo-svgrepo-com.svg";
 import { Link, useNavigate } from "react-router-dom";
@@ -7,12 +7,11 @@ import axios from "axios";
 import apiPath from "./path/apipath";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import carousel1 from "../assets/1.png"
-import carousel2 from "../assets/2.png"
-import carousel3 from "../assets/3.png"
+import carousel1 from "../assets/1.png";
+import carousel2 from "../assets/2.png";
+import carousel3 from "../assets/3.png";
 
-
-
+// Memoized ProductCard component to prevent unnecessary re-renders
 const ProductCard = React.memo(({ product }) => {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -30,7 +29,7 @@ const ProductCard = React.memo(({ product }) => {
               alt="Product"
               className={`h-full w-full object-cover object-center transition-all duration-700 ease-in-out
                 ${isHovered ? 'scale-110' : 'scale-100'}`}
-              loading="lazy" // Added lazy loading
+              loading="lazy"
             />
             {product.discount && (
               <div className="absolute top-0 left-0 bg-red-500 text-white px-3 py-1 m-2 rounded-full shadow-lg transform -rotate-12 font-medium text-sm">
@@ -51,50 +50,36 @@ const ProductCard = React.memo(({ product }) => {
   );
 });
 
+// Simplified and memoized MainCarousel component
 const MainCarousel = React.memo(() => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const timeoutRef = useRef(null);
   
-  const carouselImages = [
-    carousel1,
-    carousel2,
-    carousel3,
-  ];
+  const carouselImages = [carousel1, carousel2, carousel3];
 
-  const resetTimeout = useCallback(() => {
+  useEffect(() => {
+    // Clear any existing timeout
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
-  }, []);
-
-  useEffect(() => {
-    resetTimeout();
+    
+    // Set up auto rotation
     timeoutRef.current = setTimeout(() => {
       setCurrentSlide((prevSlide) => 
         prevSlide === carouselImages.length - 1 ? 0 : prevSlide + 1
       );
-    }, 5000); 
+    }, 5000);
 
     return () => {
-      resetTimeout();
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
     };
-  }, [currentSlide, carouselImages.length, resetTimeout]);
+  }, [currentSlide, carouselImages.length]);
 
-  const goToSlide = useCallback((index) => {
-    setCurrentSlide(index);
-  }, []);
-
-  const goToPrevSlide = useCallback(() => {
-    setCurrentSlide((prevSlide) => 
-      prevSlide === 0 ? carouselImages.length - 1 : prevSlide - 1
-    );
-  }, [carouselImages.length]);
-
-  const goToNextSlide = useCallback(() => {
-    setCurrentSlide((prevSlide) => 
-      prevSlide === carouselImages.length - 1 ? 0 : prevSlide + 1
-    );
-  }, [carouselImages.length]);
+  const goToSlide = (index) => setCurrentSlide(index);
+  const goToPrevSlide = () => setCurrentSlide(prev => prev === 0 ? carouselImages.length - 1 : prev - 1);
+  const goToNextSlide = () => setCurrentSlide(prev => prev === carouselImages.length - 1 ? 0 : prev + 1);
 
   return (
     <div className="relative w-4/5 mx-auto h-48 md:h-56 lg:h-72 overflow-hidden rounded-lg shadow-md">
@@ -108,7 +93,7 @@ const MainCarousel = React.memo(() => {
               src={image} 
               alt={`Slide ${index + 1}`} 
               className="w-full h-full object-cover"
-              loading="lazy" // Added lazy loading 
+              loading="lazy" 
             />
           </div>
         ))}
@@ -142,79 +127,25 @@ const MainCarousel = React.memo(() => {
   );
 });
 
-
+// Simplified CategoryCarousel with optimized scrolling
 const CategoryCarousel = React.memo(({ title, products }) => {
-  const [scrollPosition, setScrollPosition] = useState(0);
   const carouselRef = useRef(null);
-  const timeoutRef = useRef(null);
   
-  const scrollLeft = useCallback(() => {
+  const scrollLeft = () => {
     if (carouselRef.current) {
       carouselRef.current.scrollBy({ left: -300, behavior: 'smooth' });
     }
-  }, []);
+  };
   
-  const scrollRight = useCallback(() => {
+  const scrollRight = () => {
     if (carouselRef.current) {
       carouselRef.current.scrollBy({ left: 300, behavior: 'smooth' });
     }
-  }, []);
-
-  useEffect(() => {
-    const carousel = carouselRef.current;
-    if (!carousel) return;
-    
-    const autoScroll = () => {
-      if (carousel.scrollLeft + carousel.clientWidth >= carousel.scrollWidth - 10) {
-        carousel.scrollTo({ left: 0, behavior: 'smooth' });
-      } else {
-        carousel.scrollBy({ left: 300, behavior: 'smooth' });
-      }
-    };
-    
-    // Reduced frequency of auto-scroll from 8000ms to 10000ms
-    timeoutRef.current = setInterval(autoScroll, 10000);
-    
-    return () => {
-      if (timeoutRef.current) {
-        clearInterval(timeoutRef.current);
-      }
-    };
-  }, []);
-  
-  const handleScroll = useCallback(() => {
-    if (carouselRef.current) {
-      setScrollPosition(carouselRef.current.scrollLeft);
-    }
-  }, []);
-  
-  useEffect(() => {
-    const carousel = carouselRef.current;
-    if (carousel) {
-      // Throttle the scroll event
-      let throttleTimer;
-      const throttledScrollHandler = () => {
-        if (!throttleTimer) {
-          throttleTimer = setTimeout(() => {
-            handleScroll();
-            throttleTimer = null;
-          }, 100);
-        }
-      };
-      
-      carousel.addEventListener('scroll', throttledScrollHandler);
-      return () => carousel.removeEventListener('scroll', throttledScrollHandler);
-    }
-  }, [handleScroll]);
-  
-  const showLeftArrow = scrollPosition > 20;
-  const showRightArrow = carouselRef.current 
-    ? scrollPosition < carouselRef.current.scrollWidth - carouselRef.current.clientWidth - 20
-    : true;
+  };
     
   if (products.length === 0) return null;
   
-  // Limit number of products to display for better performance
+  // Limit products to improve performance
   const displayProducts = products.slice(0, 10);
   
   return (
@@ -224,23 +155,13 @@ const CategoryCarousel = React.memo(({ title, products }) => {
         <div className="flex space-x-2">
           <button 
             onClick={scrollLeft}
-            className={`p-2 rounded-full ${
-              showLeftArrow 
-                ? 'bg-gray-200 hover:bg-gray-300 text-gray-800' 
-                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-            }`}
-            disabled={!showLeftArrow}
+            className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-800"
           >
             <ChevronLeft size={20} />
           </button>
           <button 
             onClick={scrollRight}
-            className={`p-2 rounded-full ${
-              showRightArrow 
-                ? 'bg-gray-200 hover:bg-gray-300 text-gray-800' 
-                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-            }`}
-            disabled={!showRightArrow}
+            className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-800"
           >
             <ChevronRight size={20} />
           </button>
@@ -262,45 +183,35 @@ const CategoryCarousel = React.memo(({ title, products }) => {
   );
 });
 
-
 function Home({ useremail, setEMAIL }) {
-  const [user, setUser] = useState({ email: "", username: "",user_id:"" });
+  // Essential state variables only
+  const [user, setUser] = useState({ email: "", username: "", user_id: "" });
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
-  const [products, setProducts] = useState([]); 
+  const [products, setProducts] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [scrollY, setScrollY] = useState(0);
-  
- 
- const user_id=user.user_id
- console.log("hiiiiii"+user_id);
- 
- 
 
- const getProducts = useCallback(async () => {
-  try {
-    const res = await axios.post(`${apiPath()}/getproduct`, { user_id: user.user_id });
-    if (res.status === 200) {
-      setProducts(res.data);
-    }
-  } catch (error) {
-    console.error("Error fetching products:", error);
-  }
-}, [user.user_id]);
-
-  const categories = [
-    "vegitables",
-    "fruits",
-    "fastfood",
-    "biscuits",
-    "grains"
-  ];
-
+  const categories = ["vegitables", "fruits", "fastfood", "biscuits", "grains"];
   const navigate = useNavigate();
 
+  // Fetch products function
+  const getProducts = useCallback(async () => {
+    if (!user.user_id) return;
+    
+    try {
+      const res = await axios.post(`${apiPath()}/getproduct`, { user_id: user.user_id });
+      if (res.status === 200) {
+        setProducts(res.data);
+      }
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
+  }, [user.user_id]);
+
+  // User authentication function
   const getUser = useCallback(async () => {
     const token = localStorage.getItem("token");
 
@@ -317,7 +228,11 @@ function Home({ useremail, setEMAIL }) {
       });
 
       if (res.status === 200) {
-        setUser({ email: res.data.email, username: res.data.username, user_id: res.data._id });
+        setUser({ 
+          email: res.data.email, 
+          username: res.data.username, 
+          user_id: res.data._id 
+        });
       }
     } catch (error) {
       if (error.response?.data?.msg === "Login time expired please login again") {
@@ -327,6 +242,7 @@ function Home({ useremail, setEMAIL }) {
     }
   }, [navigate]);
   
+  // Initial data loading
   useEffect(() => {
     getUser();
   }, [useremail, getUser]);
@@ -337,25 +253,7 @@ function Home({ useremail, setEMAIL }) {
     }
   }, [user.user_id, getProducts]);
 
-  useEffect(() => {
-    // Throttle scroll events
-    let scrollThrottleTimer;
-    const handleScroll = () => {
-      if (!scrollThrottleTimer) {
-        scrollThrottleTimer = setTimeout(() => {
-          setScrollY(window.scrollY);
-          scrollThrottleTimer = null;
-        }, 100); // Throttle to once every 100ms
-      }
-    };
-    
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      clearTimeout(scrollThrottleTimer);
-    };
-  }, []);
-
+  // Logout handler
   const handleLogout = useCallback(() => {
     localStorage.removeItem("token");
     localStorage.removeItem("useremail");
@@ -370,10 +268,11 @@ function Home({ useremail, setEMAIL }) {
       theme: "dark",
     });
 
-    setUser({ email: "", username: "" });
+    setUser({ email: "", username: "", user_id: "" });
     setTimeout(() => navigate("/buyerorsellerlogin"), 3000);
   }, [navigate]);
 
+  // Filter handlers
   const handleCategoryChange = useCallback((category) => {
     setSelectedCategories(prev =>
       prev.includes(category)
@@ -382,12 +281,12 @@ function Home({ useremail, setEMAIL }) {
     );
   }, []);
 
-  
+  // Applying filters
   const applyFilters = useCallback((productsToFilter) => {
     return productsToFilter.filter(product => {
       const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(product.category);
       const matchesPrice = (!minPrice || product.price >= Number(minPrice)) && 
-                         (!maxPrice || product.price <= Number(maxPrice));
+                        (!maxPrice || product.price <= Number(maxPrice));
       const matchesSearch = !searchQuery || 
         product.product_name.toLowerCase().includes(searchQuery.toLowerCase());
       
@@ -395,31 +294,26 @@ function Home({ useremail, setEMAIL }) {
     });
   }, [selectedCategories, minPrice, maxPrice, searchQuery]);
 
-  
+  // Memoize filtered products to prevent recalculation on every render
   const filteredProducts = useMemo(() => applyFilters(products), 
     [products, applyFilters]);
   
- 
-    const filteredProductsByCategory = useMemo(() => {
-      const result = {};
-      ["vegitables", "fruits", "fastfood", "biscuits", "grains"].forEach(category => {
-        const categoryProducts = products.filter(product => product.category === category);
-        result[category] = applyFilters(categoryProducts);
-      });
-      return result;
-    }, [products, applyFilters]);
+  // Get products by category with memoization
+  const filteredProductsByCategory = useMemo(() => {
+    const result = {};
+    categories.forEach(category => {
+      const categoryProducts = products.filter(product => product.category === category);
+      result[category] = applyFilters(categoryProducts);
+    });
+    return result;
+  }, [products, applyFilters, categories]);
 
-    const handleSearch = useCallback((e) => {
-      if (e.key === 'Enter' || e.type === 'click') {
-        console.log("Searching for:", searchQuery);
-      }
-    }, [searchQuery]);
-
-    const visibleCategories = useMemo(() => 
-      Object.keys(filteredProductsByCategory).filter(
-        category => filteredProductsByCategory[category].length > 0
-      ).slice(0, 3), // Limit to 3 categories at a time
-    [filteredProductsByCategory]);
+  // Search handler
+  const handleSearch = useCallback((e) => {
+    if (e.key === 'Enter' || e.type === 'click') {
+      console.log("Searching for:", searchQuery);
+    }
+  }, [searchQuery]);
 
   return (
     <>
@@ -430,24 +324,12 @@ function Home({ useremail, setEMAIL }) {
         </div>
 
         <div className="hidden lg:flex items-center space-x-8">
-          <a href="#" className="text-sm font-medium hover:text-gray-600">
-            Offer sales
-          </a>
-          <a href="#" className="text-sm font-medium hover:text-gray-600">
-            Daily damaka
-          </a>
-          <a href="#" className="text-sm font-medium hover:text-gray-600">
-            foods
-          </a>
-          <a href="#" className="text-sm font-medium hover:text-gray-600">
-            Kids
-          </a>
-          <a href="#" className="text-sm font-medium hover:text-gray-600">
-            Sale
-          </a>
-          <a href="#" className="text-sm font-medium hover:text-gray-600">
-            SNKRS
-          </a>
+          <a href="#" className="text-sm font-medium hover:text-gray-600">Offer sales</a>
+          <a href="#" className="text-sm font-medium hover:text-gray-600">Daily damaka</a>
+          <a href="#" className="text-sm font-medium hover:text-gray-600">foods</a>
+          <a href="#" className="text-sm font-medium hover:text-gray-600">Kids</a>
+          <a href="#" className="text-sm font-medium hover:text-gray-600">Sale</a>
+          <a href="#" className="text-sm font-medium hover:text-gray-600">SNKRS</a>
         </div>
 
         <div className="flex items-center space-x-6 relative">
@@ -470,8 +352,7 @@ function Home({ useremail, setEMAIL }) {
               Search
             </button>
           </div>
-         {/* <Link to={"/wishlist"}><Heart className="w-6 h-6 cursor-pointer hover:text-gray-600" /></Link>  */}
-          <Link to={"/cart"}> <ShoppingBag className="w-6 h-6 cursor-pointer hover:text-gray-600" /></Link>
+          <Link to={"/cart"}><ShoppingBag className="w-6 h-6 cursor-pointer hover:text-gray-600" /></Link>
 
           {user.username ? (
             <div className="relative">
@@ -511,7 +392,7 @@ function Home({ useremail, setEMAIL }) {
       </nav>
 
       <div className="flex min-h-screen bg-white pt-24 flex-col">
-        {/* Left side filter icon */}
+        {/* Filter toggle button */}
         <button
           onClick={() => setIsFilterOpen(!isFilterOpen)}
           className="fixed left-4 top-29 z-50 bg-white p-3 rounded-full shadow-lg hover:bg-gray-100 transition-all duration-300"
@@ -647,13 +528,13 @@ function Home({ useremail, setEMAIL }) {
         </div>
 
         {/* Main Image Carousel */}
-        <div className="mt-10 mb-10  ">
+        <div className="mt-10 mb-10">
           <MainCarousel />
         </div>
 
-        {/* Category Product Carousels - now using filtered products */}
+        {/* Category Product Carousels */}
         <div className="w-4/5 mx-auto space-y-10">
-          {/* Show filter result summary if filters are active */}
+          {/* Filter result summary */}
           {(selectedCategories.length > 0 || minPrice || maxPrice || searchQuery) && (
             <div className="text-sm text-gray-500 mb-4">
               Showing {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'} 
@@ -665,14 +546,13 @@ function Home({ useremail, setEMAIL }) {
 
           {/* Display Filtered Category Carousels */}
           {categories.map(category => (
-            <div key={category}>
-              {filteredProductsByCategory[category]?.length > 0 && (
-                <CategoryCarousel 
-                  title={category.charAt(0).toUpperCase() + category.slice(1)} 
-                  products={filteredProductsByCategory[category]} 
-                />
-              )}
-            </div>
+            filteredProductsByCategory[category]?.length > 0 && (
+              <CategoryCarousel 
+                key={category}
+                title={category.charAt(0).toUpperCase() + category.slice(1)} 
+                products={filteredProductsByCategory[category]} 
+              />
+            )
           ))}
 
           {/* Display "All Products" grid if no categories have products after filtering */}
@@ -681,10 +561,7 @@ function Home({ useremail, setEMAIL }) {
               <h2 className="text-xl font-bold mb-6 text-gray-900">All Products</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {filteredProducts.map((product) => (
-                  <div key={product._id} className="transform transition-all duration-500 ease-in-out" style={{
-                    opacity: 1 - Math.min(0.3, scrollY / 1000),
-                    transform: `translateY(${Math.min(20, scrollY / 50)}px)`
-                  }}>
+                  <div key={product._id}>
                     <ProductCard product={product} />
                   </div>
                 ))}
@@ -723,64 +600,64 @@ function Home({ useremail, setEMAIL }) {
         }
       `}</style>
 
-       {/* Footer */}
-       <footer className="bg-black text-white py-12 mt-16">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <h4 className="font-bold mb-4">ABOUT PRADA</h4>
-              <ul className="space-y-2">
-                <li><a href="#" className="text-gray-400 hover:text-white transition">About Us</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition">Careers</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition">Sustainability</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-bold mb-4">GET HELP</h4>
-              <ul className="space-y-2">
-                <li><a href="#" className="text-gray-400 hover:text-white transition">Order Status</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition">Shipping & Delivery</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition">Returns</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition">Contact Us</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-bold mb-4">SHOP</h4>
-              <ul className="space-y-2">
-                <li><a href="#" className="text-gray-400 hover:text-white transition">Vegetables</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition">Fruits</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition">Dairy</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition">Groceries</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-bold mb-4">FOLLOW US</h4>
-              <div className="flex space-x-4">
-                <a href="#" className="bg-gray-700 hover:bg-gray-600 w-10 h-10 rounded-full flex items-center justify-center transition">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17v-6H9v-2h2V9.5C11 7.57 12.57 6 14.5 6H16v2h-1.5c-.55 0-1 .45-1 1v2H16v2h-2.5v6H11z" />
-                  </svg>
-                </a>
-                <a href="#" className="bg-gray-700 hover:bg-gray-600 w-10 h-10 rounded-full flex items-center justify-center transition">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2zm-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6zm9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8a1.25 1.25 0 0 1-1.25-1.25A1.25 1.25 0 0 1 17.25 5.5zM12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z" />
-                  </svg>
-                </a>
-                <a href="#" className="bg-gray-700 hover:bg-gray-600 w-10 h-10 rounded-full flex items-center justify-center transition">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M22.46 6c-.77.35-1.6.58-2.46.69.88-.53 1.56-1.37 1.88-2.38-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29 0 .34.04.67.11.98C8.28 9.09 5.11 7.38 3 4.79c-.37.63-.58 1.37-.58 2.15 0 1.49.75 2.81 1.91 3.56-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.22 4.22 0 0 1-1.93.07 4.28 4.28 0 0 0 4 2.98 8.521 8.521 0 0 1-5.33 1.84c-.34 0-.68-.02-1.02-.06C3.44 20.29 5.7 21 8.12 21 16 21 20.33 14.46 20.33 8.79c0-.19 0-.37-.01-.56.84-.6 1.56-1.36 2.14-2.23z" />
-                  </svg>
-                </a>
+        {/* Footer */}
+        <footer className="bg-black text-white py-12 mt-16">
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+              <div>
+                <h4 className="font-bold mb-4">ABOUT PRADA</h4>
+                <ul className="space-y-2">
+                  <li><a href="#" className="text-gray-400 hover:text-white transition">About Us</a></li>
+                  <li><a href="#" className="text-gray-400 hover:text-white transition">Careers</a></li>
+                  <li><a href="#" className="text-gray-400 hover:text-white transition">Sustainability</a></li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-bold mb-4">GET HELP</h4>
+                <ul className="space-y-2">
+                  <li><a href="#" className="text-gray-400 hover:text-white transition">Order Status</a></li>
+                  <li><a href="#" className="text-gray-400 hover:text-white transition">Shipping & Delivery</a></li>
+                  <li><a href="#" className="text-gray-400 hover:text-white transition">Returns</a></li>
+                  <li><a href="#" className="text-gray-400 hover:text-white transition">Contact Us</a></li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-bold mb-4">SHOP</h4>
+                <ul className="space-y-2">
+                  <li><a href="#" className="text-gray-400 hover:text-white transition">Vegetables</a></li>
+                  <li><a href="#" className="text-gray-400 hover:text-white transition">Fruits</a></li>
+                  <li><a href="#" className="text-gray-400 hover:text-white transition">Dairy</a></li>
+                  <li><a href="#" className="text-gray-400 hover:text-white transition">Groceries</a></li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-bold mb-4">FOLLOW US</h4>
+                <div className="flex space-x-4">
+                  <a href="#" className="bg-gray-700 hover:bg-gray-600 w-10 h-10 rounded-full flex items-center justify-center transition">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17v-6H9v-2h2V9.5C11 7.57 12.57 6 14.5 6H16v2h-1.5c-.55 0-1 .45-1 1v2H16v2h-2.5v6H11z" />
+                    </svg>
+                  </a>
+                  <a href="#" className="bg-gray-700 hover:bg-gray-600 w-10 h-10 rounded-full flex items-center justify-center transition">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2zm-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6zm9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8a1.25 1.25 0 0 1-1.25-1.25A1.25 1.25 0 0 1 17.25 5.5zM12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z" />
+                    </svg>
+                  </a>
+                  <a href="#" className="bg-gray-700 hover:bg-gray-600 w-10 h-10 rounded-full flex items-center justify-center transition">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M22.46 6c-.77.35-1.6.58-2.46.69.88-.53 1.56-1.37 1.88-2.38-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29 0 .34.04.67.11.98C8.28 9.09 5.11 7.38 3 4.79c-.37.63-.58 1.37-.58 2.15 0 1.49.75 2.81 1.91 3.56-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.22 4.22 0 0 1-1.93.07 4.28 4.28 0 0 0 4 2.98 8.521 8.521 0 0 1-5.33 1.84c-.34 0-.68-.02-1.02-.06C3.44 20.29 5.7 21 8.12 21 16 21 20.33 14.46 20.33 8.79c0-.19 0-.37-.01-.56.84-.6 1.56-1.36 2.14-2.23z" />
+                    </svg>
+                  </a>
+                </div>
               </div>
             </div>
+            <div className="border-t border-gray-800 mt-8 pt-8 text-sm text-gray-400">
+              <p>© 2025 prada PvtLtd. All Rights Reserved.</p>
+            </div>
           </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-sm text-gray-400">
-            <p>© 2025 prada PvtLtd. All Rights Reserved.</p>
-          </div>
-        </div>
-      </footer>
-    </>
-  );
-}
+        </footer>
+      </>
+    );
+  }
 
-export default React.memo(Home);
+  export default React.memo(Home);
