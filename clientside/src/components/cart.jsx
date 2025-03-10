@@ -12,7 +12,13 @@ function CartPage() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [cartItems, setCartItems] = useState([]); 
   const [products, setProducts] = useState([]); 
-  const [quantity, setQuantity] = useState(1);
+  const [quantities, setQuantities] = useState({});
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [order, setOrder] = useState({
+    address: "",
+    products: [],
+    total_price: 0
+  });
 
   const getCart = async () => {
     try {
@@ -49,8 +55,15 @@ function CartPage() {
 
       if (res.data && Array.isArray(res.data)) {  
         setProducts(res.data);
+        // Initialize quantities for each product
+        const initialQuantities = {};
+        res.data.forEach(product => {
+          initialQuantities[product._id] = 1;
+        });
+        setQuantities(initialQuantities);
       } else if (typeof res.data === "object") {
-        setProducts(res.data);
+        setProducts([res.data]);
+        setQuantities({ [res.data._id]: 1 });
       } else {
         console.error("Unexpected response format:", res.data);
         setProducts([]);
@@ -105,15 +118,31 @@ function CartPage() {
     setTimeout(() => navigate("/buyerorsellerlogin"), 3000);
   };
 
-  const PriceSummary = () => {
-    const totalPrice = products.reduce((sum, product) => sum + product.price, 0);
+  const calculatePriceDetails = () => {
+    let totalPrice = 0;
+    let totalDiscount = 0;
 
-    const totalDiscount = products.reduce(
-      (sum, product) => sum + (product.discount ? Math.round(product.price * (product.discount / 100)) : 0),
-      0
-    );
+    products.forEach(product => {
+      const quantity = quantities[product._id] || 1;
+      const productTotal = product.price * quantity;
+      totalPrice += productTotal;
+      
+      if (product.discount) {
+        totalDiscount += Math.round(productTotal * (product.discount / 100));
+      }
+    });
 
     const totalAmount = totalPrice - totalDiscount;
+    
+    return {
+      totalPrice,
+      totalDiscount,
+      totalAmount
+    };
+  };
+
+  const PriceSummary = () => {
+    const { totalPrice, totalDiscount, totalAmount } = calculatePriceDetails();
 
     return (
       <div className="space-y-3">
@@ -135,14 +164,18 @@ function CartPage() {
     );
   };
 
-  const increaseQuantity = () => {
-    setQuantity((prev) => prev + 1);
+  const increaseQuantity = (productId) => {
+    setQuantities(prev => ({
+      ...prev,
+      [productId]: (prev[productId] || 1) + 1
+    }));
   };
 
-  const decreaseQuantity = () => {
-    if (quantity > 1) {
-      setQuantity((prev) => prev - 1);
-    }
+  const decreaseQuantity = (productId) => {
+    setQuantities(prev => ({
+      ...prev,
+      [productId]: Math.max((prev[productId] || 1) - 1, 1)
+    }));
   };
 
   const handleItemDelete = async (id) => {
@@ -162,6 +195,51 @@ function CartPage() {
       }
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  const handleAddOrder = async () => {
+    try {
+      console.log("idddd",user._id);
+      
+      const { totalAmount } = calculatePriceDetails();
+      
+      // Prepare order data with product details and quantities
+      const orderProducts = products.map(product => ({
+        product_id: product._id,
+        product_name: product.product_name,
+        quantity: quantities[product._id] || 1,
+        price: product.price,
+        discount: product.discount || 0
+      }));
+      
+      const orderData = {
+        address: "Default Address", // You might want to get this from user input
+        products: orderProducts,
+        total_price: totalAmount
+      };
+      
+      setOrder(orderData);
+      const user_id=user._id;
+      
+      const res = await axios.post(`${apiPath()}/addtoorder`,{ user_id, orderData });
+      
+      if (res.status === 201 || res.status === 200) {
+        setShowConfirmation(true);
+        
+        // Hide confirmation after 3 seconds
+        setTimeout(() => {
+          setShowConfirmation(false);
+          navigate("/"); // Navigate to home or order confirmation page
+        }, 3000);
+      }
+    } catch (error) {
+      console.error("Error placing order:", error);
+      toast.error("Failed to place order. Please try again.", {
+        position: "top-right",
+        autoClose: 3000,
+        theme: "dark",
+      });
     }
   };
 
@@ -245,21 +323,21 @@ function CartPage() {
                       <div className="flex items-center justify-between mt-4">
                         <button
                           className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 transition"
-                          onClick={decreaseQuantity}
+                          onClick={() => decreaseQuantity(product._id)}
                         >
                           <span className="text-gray-500">-</span>
                         </button>
 
                         <input
                           type="text"
-                          value={quantity}
+                          value={quantities[product._id] || 1}
                           readOnly
                           className="w-12 text-center border border-gray-300 mx-2 rounded"
                         />
 
                         <button
                           className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 transition"
-                          onClick={increaseQuantity}
+                          onClick={() => increaseQuantity(product._id)}
                         >
                           <span className="text-gray-500">+</span>
                         </button>
@@ -279,13 +357,13 @@ function CartPage() {
 
                       <div className="flex items-center mb-4">
                         {product.discount > 0 && (
-                          <span className="text-gray-500 line-through text-sm">₹{product.price}</span>
+                          <span className="text-gray-500 line-through text-sm">₹{(product.price * (quantities[product._id] || 1)).toFixed(2)}</span>
                         )}
 
                         <span className="text-2xl font-bold ml-4">
                           ₹{product.discount > 0
-                            ? Math.round(product.price - (product.price * product.discount / 100))
-                            : product.price}
+                            ? Math.round((product.price - (product.price * product.discount / 100)) * (quantities[product._id] || 1))
+                            : (product.price * (quantities[product._id] || 1)).toFixed(2)}
                         </span>
 
                         {product.discount > 0 && (
@@ -321,7 +399,10 @@ function CartPage() {
             <div className="w-full lg:w-1/4 bg-white p-6 shadow-lg">
               <h2 className="text-lg font-medium mb-4">PRICE DETAILS</h2>
               <PriceSummary />
-              <button className="w-full bg-orange-500 text-white py-3 rounded mt-6 hover:bg-orange-600 transition">
+              <button 
+                className="w-full bg-orange-500 text-white py-3 rounded mt-6 hover:bg-orange-600 transition"
+                onClick={handleAddOrder}
+              >
                 PLACE ORDER
               </button>
             </div>
@@ -340,6 +421,18 @@ function CartPage() {
           </div>
         )}
       </div>
+      
+      {/* Order Confirmation Popup */}
+      {showConfirmation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-lg shadow-xl text-center">
+            <div className="text-green-500 text-6xl mb-4">✓</div>
+            <h2 className="text-2xl font-bold mb-2">Order Confirmed!</h2>
+            <p className="text-gray-600 mb-4">Your order has been placed successfully.</p>
+            <p className="font-medium">Total: ₹{calculatePriceDetails().totalAmount.toFixed(2)}</p>
+          </div>
+        </div>
+      )}
     </>
   );
 }
