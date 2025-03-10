@@ -55,7 +55,7 @@ function CartPage() {
 
       if (res.data && Array.isArray(res.data)) {  
         setProducts(res.data);
-        // Initialize quantities for each product
+       
         const initialQuantities = {};
         res.data.forEach(product => {
           initialQuantities[product._id] = 1;
@@ -198,13 +198,28 @@ function CartPage() {
     }
   };
 
+  const clearCart = async () => {
+    try {
+      if (!user._id) return;
+      
+      const res = await axios.delete(`${apiPath()}/clearcart/${user._id}`);
+      
+      if (res.status === 200 || res.status === 201) {
+        console.log("Cart cleared successfully");
+      } else {
+        console.error("Failed to clear cart:", res.data);
+      }
+    } catch (error) {
+      console.error("Error clearing cart:", error);
+    }
+  };
+
   const handleAddOrder = async () => {
     try {
       console.log("idddd",user._id);
       
       const { totalAmount } = calculatePriceDetails();
-      
-      // Prepare order data with product details and quantities
+    
       const orderProducts = products.map(product => ({
         product_id: product._id,
         product_name: product.product_name,
@@ -214,7 +229,7 @@ function CartPage() {
       }));
       
       const orderData = {
-        address: "Default Address", // You might want to get this from user input
+        address: "Default Address", 
         products: orderProducts,
         total_price: totalAmount
       };
@@ -225,12 +240,14 @@ function CartPage() {
       const res = await axios.post(`${apiPath()}/addtoorder`,{ user_id, orderData });
       
       if (res.status === 201 || res.status === 200) {
-        setShowConfirmation(true);
+       
+        await clearCart();
         
-        // Hide confirmation after 3 seconds
+        setShowConfirmation(true);
+
         setTimeout(() => {
           setShowConfirmation(false);
-          navigate("/"); // Navigate to home or order confirmation page
+          window.location.reload();
         }, 3000);
       }
     } catch (error) {
