@@ -12,20 +12,15 @@ function CartPage() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [cartItems, setCartItems] = useState([]); 
   const [products, setProducts] = useState([]); 
-
-
-
-
+  const [quantity, setQuantity] = useState(1);
 
   const getCart = async () => {
     try {
-    
       if (!user._id) {
         console.error("User ID is not available.");
         return;
       }
 
- 
       const res = await axios.get(`${apiPath()}/getcartcheck/${user._id}`);
       console.log("Cart API Response:", res.data);
 
@@ -44,8 +39,6 @@ function CartPage() {
   };
   console.log(cartItems);
 
-
-
   const getProducts = async () => {
     if (cartItems.length === 0) return; 
 
@@ -54,7 +47,7 @@ function CartPage() {
       const res = await axios.post(`${apiPath()}/getproducts`, { _id: productIds });
       console.log("Products API Response:", res.data);
 
-      if (res.data & Array.isArray(res.data)) {
+      if (res.data && Array.isArray(res.data)) {  
         setProducts(res.data);
       } else if (typeof res.data === "object") {
         setProducts(res.data);
@@ -69,8 +62,6 @@ function CartPage() {
   };
 
   console.log(products);
-
-
   
   const getUser = async () => {
     const token = localStorage.getItem("token");
@@ -96,7 +87,6 @@ function CartPage() {
     }
   };
 
-
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("useremail");
@@ -115,7 +105,6 @@ function CartPage() {
     setTimeout(() => navigate("/buyerorsellerlogin"), 3000);
   };
 
-
   const PriceSummary = () => {
     const totalPrice = products.reduce((sum, product) => sum + product.price, 0);
 
@@ -125,8 +114,6 @@ function CartPage() {
     );
 
     const totalAmount = totalPrice - totalDiscount;
-
-
 
     return (
       <div className="space-y-3">
@@ -147,26 +134,6 @@ function CartPage() {
       </div>
     );
   };
-
-  useEffect(() => {
-    getUser();
-  }, []);
-
-  useEffect(() => {
-    if (user._id) {
-      getCart();
-    }
-  }, [user._id]);
-
-
-
-  useEffect(() => {
-    if (cartItems.length > 0) {
-      getProducts();
-    }
-  }, [cartItems]);
-
-  const [quantity, setQuantity] = useState(1);
 
   const increaseQuantity = () => {
     setQuantity((prev) => prev + 1);
@@ -197,23 +164,35 @@ function CartPage() {
       console.log(error);
     }
   };
-  
+
+  useEffect(() => {
+    getUser();
+  }, []);
+
+  useEffect(() => {
+    if (user._id) {
+      getCart();
+    }
+  }, [user._id]);
+
+  useEffect(() => {
+    if (cartItems.length > 0) {
+      getProducts();
+    }
+  }, [cartItems]);
 
   return (
     <>
-     
       <nav className="flex items-center justify-between px-8 py-4 bg-white border-b shadow-sm sticky top-0 z-50">
         <ToastContainer />
         <Link to="/">
           <img src={logo} className="w-18 h-16 mt-1.5" alt="Logo" />
         </Link>
 
-       
         <div className="flex items-center space-x-6">
           <Search className="w-6 h-6 cursor-pointer text-gray-700 hover:text-black transition" />
-          <Heart className="w-6 h-6 cursor-pointer text-gray-700 hover:text-red-500 transition" />
-          <ShoppingBag className="w-6 h-6 cursor-pointer text-gray-700 hover:text-black transition" />
-
+          {/* <Heart className="w-6 h-6 cursor-pointer text-gray-700 hover:text-red-500 transition" />
+          <ShoppingBag className="w-6 h-6 cursor-pointer text-gray-700 hover:text-black transition" /> */}
           
           {user.username ? (
             <div className="relative">
@@ -246,19 +225,16 @@ function CartPage() {
         </div>
       </nav>
 
-      
       <div className="min-h-screen bg-gray-50">
-        <div className="flex flex-col lg:flex-row max-w-7xl mx-auto">
-          
-          <div className="w-full lg:w-3/4 p-4">
-            {products.length > 0 ? (
-              products.map((product) => (
+        {products.length > 0 ? (
+          <div className="flex flex-col lg:flex-row max-w-7xl mx-auto">
+            <div className="w-full lg:w-3/4 p-4">
+              {products.map((product) => (
                 <div
                   key={product._id}
                   className="bg-white p-6 rounded-lg shadow-md mb-6"
                 >
                   <div className="flex flex-col sm:flex-row gap-6">
-                   
                     <div className="w-32 sm:w-48">
                       <img
                         src={product.photos[0]}
@@ -267,7 +243,6 @@ function CartPage() {
                       />
                      
                       <div className="flex items-center justify-between mt-4">
-                       
                         <button
                           className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 transition"
                           onClick={decreaseQuantity}
@@ -291,9 +266,7 @@ function CartPage() {
                       </div>
                     </div>
 
-                   
                     <div className="flex-1">
-                     
                       <div className="mb-4">
                         <h3 className="text-xl font-semibold">{product.product_name}</h3>
                         <div className="flex items-center mt-1">
@@ -305,24 +278,20 @@ function CartPage() {
                       </div>
 
                       <div className="flex items-center mb-4">
-                        
                         {product.discount > 0 && (
                           <span className="text-gray-500 line-through text-sm">₹{product.price}</span>
                         )}
 
-                       
                         <span className="text-2xl font-bold ml-4">
                           ₹{product.discount > 0
                             ? Math.round(product.price - (product.price * product.discount / 100))
                             : product.price}
                         </span>
 
-                        
                         {product.discount > 0 && (
                           <span className="ml-4 text-green-600">{product.discount}% Off</span>
                         )}
                       </div>
-
 
                       <div className="mb-6">
                         <span className="text-sm">
@@ -332,13 +301,13 @@ function CartPage() {
                         </span>
                       </div>
 
-                      
                       <div className="flex items-center">
                         <button className="mr-6 text-gray-700 font-medium hover:text-gray-900 transition">
                           SAVE FOR LATER
                         </button>
-                        <button className="text-red-600 font-medium bg-red-50 px-4 py-2 rounded hover:bg-red-100 transition"
-                        onClick={()=>{handleItemDelete(product._id)}}
+                        <button 
+                          className="text-red-600 font-medium bg-red-50 px-4 py-2 rounded hover:bg-red-100 transition"
+                          onClick={() => handleItemDelete(product._id)}
                         >
                           REMOVE
                         </button>
@@ -346,23 +315,30 @@ function CartPage() {
                     </div>
                   </div>
                 </div>
-              ))
-            ) : (
-              <div className="py-8 text-center text-gray-500">
-                Your cart is empty.
-              </div>
-            )}
-          </div>
+              ))}
+            </div>
 
-          
-          <div className="w-full lg:w-1/4 bg-white p-6 shadow-lg">
-            <h2 className="text-lg font-medium mb-4">PRICE DETAILS</h2>
-            <PriceSummary />
-            <button className="w-full bg-orange-500 text-white py-3 rounded mt-6 hover:bg-orange-600 transition">
-              PLACE ORDER
-            </button>
+            <div className="w-full lg:w-1/4 bg-white p-6 shadow-lg">
+              <h2 className="text-lg font-medium mb-4">PRICE DETAILS</h2>
+              <PriceSummary />
+              <button className="w-full bg-orange-500 text-white py-3 rounded mt-6 hover:bg-orange-600 transition">
+                PLACE ORDER
+              </button>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="max-w-7xl mx-auto p-8">
+            <div className="py-16 text-center">
+              <div className="bg-white p-8 rounded-lg shadow-md">
+                <h2 className="text-2xl font-medium mb-4 text-gray-800">Your cart is empty</h2>
+                <p className="text-gray-500 mb-6">Looks like you haven't added anything to your cart yet.</p>
+                <Link to="/" className="inline-block bg-orange-500 text-white px-6 py-3 rounded hover:bg-orange-600 transition">
+                  Continue Shopping
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

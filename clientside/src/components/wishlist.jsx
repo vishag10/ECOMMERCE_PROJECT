@@ -110,17 +110,17 @@ function PageWishList(){
             <nav className="flex items-center justify-between px-8 py-4 bg-white border-b">
                     <ToastContainer />
             
-                    <div className="flex items-center">
-                      <img src={logo} className="w-18 h-16 mt-1.5" alt="Logo" />
-                    </div>
+                    <Link to={"/"}><div className="flex items-center">
+                              <img src={logo} className="w-18 h-16 mt-1.5" alt="Logo" />
+                            </div></Link> 
             
                     <div className="hidden lg:flex items-center space-x-8">
-                      <a href="#" className="text-sm font-medium hover:text-gray-600">New & Featured</a>
-                      <a href="#" className="text-sm font-medium hover:text-gray-600">Men</a>
-                      <a href="#" className="text-sm font-medium hover:text-gray-600">Women</a>
-                      <a href="#" className="text-sm font-medium hover:text-gray-600">Kids</a>
-                      <a href="#" className="text-sm font-medium hover:text-gray-600">Sale</a>
-                      <a href="#" className="text-sm font-medium hover:text-gray-600">SNKRS</a>
+                      <a href="#" className="text-sm font-medium hover:text-gray-600">    </a>
+                      <a href="#" className="text-sm font-medium hover:text-gray-600">    </a>
+                      <a href="#" className="text-sm font-medium hover:text-gray-600">    </a>
+                      <a href="#" className="text-sm font-medium hover:text-gray-600">    </a>
+                      <a href="#" className="text-sm font-medium hover:text-gray-600">    </a>
+                      <a href="#" className="text-sm font-medium hover:text-gray-600">    </a>
                     </div>
             
                     <div className="flex items-center space-x-6 relative">
@@ -137,8 +137,8 @@ function PageWishList(){
                           Search
                         </button>
                       </div>
-                      <Heart className="w-6 h-6 cursor-pointer hover:text-gray-600" />
-                      <ShoppingBag className="w-6 h-6 cursor-pointer hover:text-gray-600" />
+                      {/* <Heart className="w-6 h-6 cursor-pointer hover:text-gray-600" />
+                      <ShoppingBag className="w-6 h-6 cursor-pointer hover:text-gray-600" /> */}
             
                       {user.username ? (
                         <div className="relative">
