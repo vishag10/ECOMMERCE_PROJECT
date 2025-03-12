@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import logo from "../assets/prada-logo-svgrepo-com.svg";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import apiPath from "./path/apipath";
 import { ToastContainer, toast } from "react-toastify";
-import { Search, Heart, ShoppingBag } from "lucide-react";
+import { Search } from "lucide-react";
 
 function CartPage() {
   const navigate = useNavigate();
@@ -165,6 +165,7 @@ function CartPage() {
   };
 
   const increaseQuantity = (productId) => {
+    
     setQuantities(prev => ({
       ...prev,
       [productId]: (prev[productId] || 1) + 1
@@ -213,10 +214,77 @@ function CartPage() {
       console.error("Error clearing cart:", error);
     }
   };
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+  
+
 
   const handleAddOrder = async () => {
     try {
-      console.log("idddd",user._id);
+      if(!address)
+      {
+         toast.warn('Please add the addresss')
+        setTimeout(() => {
+          navigate("/profile")
+        }, 1000); 
+        return;
+      }
+      const { totalAmount } = calculatePriceDetails();
+  
+      // Step 1: Load Razorpay script
+      const scriptLoaded = await loadRazorpayScript();
+      if (!scriptLoaded) {
+        console.error("Failed to load Razorpay script.");
+        toast.error("Razorpay SDK failed to load. Check your network.", {
+          position: "top-right",
+          autoClose: 3000,
+          theme: "dark",
+        });
+        return;
+      }
+  
+      // Step 2: Create an order on the backend
+      const orderResponse = await axios.post(`${apiPath()}/razorpay-create-order`, {
+        amount: totalAmount * 100, // Convert to paise
+        currency: "INR",
+      });
+  
+      if (orderResponse.status !== 200) {
+        throw new Error("Failed to create Razorpay order");
+      }
+  
+      const { id: order_id, amount } = orderResponse.data;
+  
+      // Step 3: Initialize Razorpay Checkout
+      const options = {
+        key: "rzp_test_3Nt8Vtk7SZEtCI", // Use your Razorpay Test Key
+        amount: amount,
+        currency: "INR",
+        name: "Your Store",
+        description: "E-commerce Order Payment",
+        order_id: order_id,
+        handler: async function (response) {
+          console.log("Payment Successful:", response);
+
+
+          
+          // Step 4: Verify Payment on the backend
+          const verifyResponse = await axios.post(`${apiPath()}/razorpay-verify-payment`, {
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+          });
+  
+          if (verifyResponse.data.success) {
+            console.log("Payment Verified:", verifyResponse.data);
+            console.log("idddd",user._id);
       
       const { totalAmount } = calculatePriceDetails();
     
@@ -229,7 +297,7 @@ function CartPage() {
       }));
       
       const orderData = {
-        address: "Default Address", 
+        address: address, 
         products: orderProducts,
         total_price: totalAmount
       };
@@ -250,18 +318,59 @@ function CartPage() {
           window.location.reload();
         }, 3000);
       }
+          } else {
+            toast.error("Payment verification failed!", { position: "top-right", autoClose: 3000, theme: "dark" });
+          }
+        },
+        prefill: {
+          name: user.username,
+          email: user.email,
+          contact: "9999999999",
+        },
+        theme: { color: "#3399cc" },
+      };
+  
+      const razorpayInstance = new window.Razorpay(options);
+      razorpayInstance.open();
     } catch (error) {
-      console.error("Error placing order:", error);
-      toast.error("Failed to place order. Please try again.", {
-        position: "top-right",
-        autoClose: 3000,
-        theme: "dark",
-      });
+      if(error.response){
+        alert(error.response.data.msg);
+      }
+      console.error("Error processing payment:", error);
+      toast.error("Failed to process payment. Please try again.", { position: "top-right", autoClose: 3000, theme: "dark" });
     }
   };
+  
+
+
+  const [address,setAddress]=useState()
+
+  const handleAddress = async () => {
+    try {
+      const address_id = user._id;
+      console.log("Address ID:", address_id);
+  
+      // ✅ Send address_id as JSON body
+      const res = await axios.post(`${apiPath()}/getorderaddress`, { address_id });
+  
+      // ✅ Axios response is in res.data
+      console.log("Received Address:", res.data);
+      setAddress(res.data)
+      
+    } catch (error) {
+      console.error("Error fetching address:", error);
+    }
+  };
+  
+  
+  useEffect(()=>
+  {
+    handleAddress()
+  },[user._id])
 
   useEffect(() => {
     getUser();
+    
   }, []);
 
   useEffect(() => {

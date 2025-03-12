@@ -6,6 +6,7 @@ import * as ah from "./RequestHandler/address.requesthandler.js"
 import * as ch from "./RequestHandler/kart.requesthandler.js"
 import * as wh from "./RequestHandler/wishlist.requesthandler.js"
 import * as oh from "./RequestHandler/order.requesthandler.js"
+import * as paymentHandler from "./RequestHandler/payment.requesthandler.js";
 
 import Auth from "./middleware/auth.js";
 
@@ -58,6 +59,10 @@ router.route("/addtowishlist").post(wh.addProductToWishlist);
 
 //order
 router.route("/addtoorder").post(oh.AddToorder);
+router.route("/getorderaddress").post(oh.GetAddress)
 
+// Razorpay Payment Routes
+router.route("/razorpay-create-order").post(paymentHandler.createRazorpayOrder);
+router.route("/razorpay-verify-payment").post(paymentHandler.verifyRazorpayPayment);
 
 export default router;
