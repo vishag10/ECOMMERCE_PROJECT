@@ -67,19 +67,14 @@ function SellItem() {
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700">Category</label>
-            <select
+            <input
+              type="text"
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
               name="category"
+              placeholder="Enter product category"
               onChange={(e) => setProduct((prev) => ({ ...prev, category: e.target.value }))}
               value={product.category}
-            >
-              <option value="" disabled hidden>Select Category</option>
-              <option>vegitables</option>
-              <option>fruits</option>
-              <option>fastfood</option>
-              <option>biscuits</option>
-              <option>grains</option>
-            </select>
+            />
           </div>
 
           <div className="mb-4">
