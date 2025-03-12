@@ -69,7 +69,6 @@ function Product() {
     }
   }, [user, product]);
 
- 
   useEffect(() => {
     if (!product.photos || product.photos.length <= 1) return;
 
@@ -83,7 +82,6 @@ function Product() {
 
     play();
 
-   
     return () => {
       if (autoPlayRef.current) {
         clearInterval(autoPlayRef.current);
@@ -138,7 +136,6 @@ function Product() {
   const [quantity, setQuantity] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState(0);
 
-  
   const mockPhotos = [
     "https://www.longines.com/media/catalog/product/cache/8db0cbef53b094d206272ae26deca8a4/l/3/l3.720.4.92.6_0001.png",
     "https://www.longines.com/media/catalog/product/cache/8db0cbef53b094d206272ae26deca8a4/l/3/l3.720.4.92.6_0002.png",
@@ -146,9 +143,7 @@ function Product() {
     "https://www.longines.com/media/catalog/product/cache/8db0cbef53b094d206272ae26deca8a4/l/3/l3.720.4.92.6_0004.png"
   ];
 
-  
   const displayPhotos = product.photos && product.photos.length > 0 ? product.photos : mockPhotos;
-
 
   const variants = displayPhotos.map((photo, index) => ({
     id: index + 1,
@@ -156,7 +151,6 @@ function Product() {
     color: ["Blue", "Silver", "Green", "Black"][index % 4] 
   }));
 
-  
   const handleVariantSelect = (index) => {
     setSelectedVariant(index);
     setCurrentImageIndex(index); 
@@ -202,16 +196,28 @@ function Product() {
     }
   }, [user, product]);
 
- 
-  const calculateDiscountedPrice = () => {
+  // Calculate actual price, MRP (10% higher), and discounted price
+  const calculatePrices = () => {
+    const actualPrice = product.price || 203000;
+    const mrpPrice = actualPrice * 1.1; // MRP is 10% higher than actual price
+    
     if (product.discount && product.discount > 0) {
-      const discountAmount = (product.price * product.discount) / 100;
-      return product.price - discountAmount;
+      const discountAmount = (actualPrice * product.discount) / 100;
+      return {
+        actualPrice,
+        mrpPrice,
+        discountedPrice: actualPrice - discountAmount
+      };
     }
-    return product.price;
+    
+    return {
+      actualPrice,
+      mrpPrice,
+      discountedPrice: actualPrice
+    };
   };
 
-  const discountedPrice = calculateDiscountedPrice();
+  const { actualPrice, mrpPrice, discountedPrice } = calculatePrices();
 
   return (
     <>
@@ -244,7 +250,6 @@ function Product() {
               Search
             </button>
           </div>
-          {/* <Heart className="w-6 h-6 cursor-pointer hover:text-gray-600" /> */}
           <Link to={"/cart"}><ShoppingBag className="w-6 h-6 cursor-pointer hover:text-gray-600" /></Link>
 
           {user.username ? (
@@ -278,9 +283,9 @@ function Product() {
         </div>
       </nav>
 
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto p-4 lg:p-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 bg-white rounded-2xl shadow-sm p-4 lg:p-8">
+      <div className="min-h-screen bg-gray-100">
+        <div className="max-w-6xl mx-auto p-4 lg:p-6"> {/* Reduced container size */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 bg-white rounded-2xl shadow-md p-4 lg:p-6"> {/* Reduced padding */}
             
             <div className="relative">
               <div className="sticky top-8 space-y-4">
@@ -319,7 +324,6 @@ function Product() {
                   </button>
                 </div>
 
-                
                 <div className="flex justify-center gap-2 mt-2">
                   {displayPhotos.map((_, index) => (
                     <button
@@ -340,27 +344,30 @@ function Product() {
               </div>
             </div>
 
-           
-            <div className="space-y-6 lg:space-y-8">
+            <div className="space-y-4 lg:space-y-6"> {/* Reduced spacing */}
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <span className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm font-medium">New</span>
+                  {product.discount && product.discount > 0 && (
+                    <span className="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm font-medium">
+                      {product.discount}% OFF
+                    </span>
+                  )}
                 </div>
-                <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">{product.product_name}</h1>
-                <p className="text-gray-600 text-lg">
+                <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">{product.product_name}</h1>
+                <p className="text-gray-600 text-base">
                   {product.description || "Fresh and organic."}
                 </p>
               </div>
 
-              
               <div className="space-y-3">
                 <h2 className="text-lg font-semibold text-gray-900">Available Variations</h2>
-                <div className="flex flex-wrap gap-4">
+                <div className="flex flex-wrap gap-3">
                   {variants.map((variant, index) => (
                     <button
                       key={variant.id}
                       onClick={() => handleVariantSelect(index)}
-                      className={`w-20 h-20 rounded-xl transition-transform transform hover:scale-105 ${
+                      className={`w-16 h-16 rounded-xl transition-transform transform hover:scale-105 ${
                         selectedVariant === index
                           ? 'ring-2 ring-blue-500 ring-offset-2'
                           : 'ring-1 ring-gray-200'
@@ -376,69 +383,71 @@ function Product() {
                 </div>
               </div>
 
-             
-              <div className="space-y-3">
-                <h2 className="text-lg font-semibold text-gray-900">Quantity</h2>
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={() => handleQuantityChange(-1)}
-                    className="p-2 rounded-full border hover:bg-gray-100 transition-colors"
-                  >
-                    <Minus size={24} />
-                  </button>
-                  <span className="text-2xl font-medium w-12 text-center">{quantity}</span>
-                  <button
-                    onClick={() => handleQuantityChange(1)}
-                    className="p-2 rounded-full border hover:bg-gray-100 transition-colors"
-                  >
-                    <Plus size={24} />
-                  </button>
-                </div>
-              </div>
-
-              
-              <div className="space-y-4 pt-6">
-                <div className="flex items-baseline gap-2">
-                  {product.discount && product.discount > 0 ? (
-                    <>
-                      <p className="text-3xl lg:text-4xl font-bold text-gray-900">
-                        ₹{discountedPrice.toFixed(2)}
-                      </p>
-                      <p className="text-xl text-gray-500 line-through">
-                        ₹{product.price}
-                      </p>
+              {/* Price section with MRP and discounted price */}
+              <div className="space-y-2 pt-2 pb-4 border-b border-gray-200">
+                <div className="flex flex-col">
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-red-500 line-through text-lg">
+                      MRP: ₹{mrpPrice.toFixed(2)}
+                    </p>
+                  </div>
+                  
+                  <div className="flex items-baseline gap-2 mt-1">
+                    <p className="text-2xl lg:text-3xl font-bold text-green-600">
+                      ₹{discountedPrice.toFixed(2)}
+                    </p>
+                    {product.discount && product.discount > 0 && (
                       <span className="text-green-600 text-lg font-medium">
                         ({product.discount}% off)
                       </span>
-                    </>
-                  ) : (
-                    <p className="text-3xl lg:text-4xl font-bold text-gray-900">
-                      ₹{product.price || "203,000.00"}
+                    )}
+                  </div>
+                  
+                  <p className="text-sm text-gray-500 mt-1">inclusive of all taxes</p>
+                  
+                  <div className="mt-2 bg-green-50 border border-green-200 rounded-lg p-3">
+                    <p className="text-green-800 text-sm font-medium">
+                      You save: ₹{(mrpPrice - discountedPrice).toFixed(2)} ({((mrpPrice - discountedPrice) / mrpPrice * 100).toFixed(0)}%)
                     </p>
-                  )}
-                  <span className="text-gray-500">inclusive of all taxes</span>
+                  </div>
                 </div>
+              </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Added spacing to push buttons to bottom */}
+              <div className="flex-grow"></div>
+              
+              {/* Cart and Buy buttons positioned at bottom */}
+              <div className="pt-4 mt-auto">
+                <div className="flex  gap-3">
                   {isAddedToCart ? (
                     <button
                       onClick={handleGoToCart}
-                      className="w-full bg-green-600 text-white py-4 px-6 rounded-xl hover:bg-green-700 transition-colors flex items-center justify-center gap-2 text-lg font-medium"
+                      className="w-full bg-green-600 text-white py-3 px-6 rounded-xl hover:bg-green-700 transition-colors flex items-center justify-center gap-2 text-lg font-medium shadow-md"
                     >
+                      <ShoppingCart size={22} />
                       Go to Cart
                     </button>
                   ) : (
                     <button
                       onClick={handleCart}
-                      className="w-full bg-blue-600 text-white py-4 px-6 rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-lg font-medium"
+                      className="w-full bg-blue-600 text-white py-3 px-6 rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-lg font-medium shadow-md"
                     >
-                      <ShoppingCart size={24} />
+                      <ShoppingCart size={22} />
                       Add to Cart
                     </button>
                   )}
-                  <button className="w-full bg-gray-900 text-white py-4 px-6 rounded-xl hover:bg-gray-800 transition-colors text-lg font-medium">
+                  <button className="w-full bg-gray-900 text-white py-3 px-6 rounded-xl hover:bg-gray-800 transition-colors text-lg font-medium shadow-md"
+                  onClick={handleCart}>
                     Buy Now
                   </button>
+                </div>
+                
+                {/* Shipping and return info */}
+                <div className="mt-4 bg-gray-50 p-3 rounded-lg">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <span className="font-medium">Free shipping</span> 
+               
+                  </div>
                 </div>
               </div>
             </div>

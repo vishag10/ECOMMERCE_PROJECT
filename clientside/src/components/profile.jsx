@@ -275,16 +275,16 @@ function Profile({ useremail, setEMAIL }) {
               {user.accounttype === "seller" ? (
                 <div className="flex flex-col items-center space-y-3">
                   <Link to={"/sellitem"} state={{ _id: user._id }}>
-                    <button className="cursor-pointer w-40 px-4 py-2 text-sm bg-[#1877F2] text-white rounded-md hover:bg-[#166FE5] transition">
+                    <button className="cursor-pointer  w-40 px-4 py-2 text-sm bg-[#1877F2] text-white rounded-md hover:bg-[#166FE5] transition">
                       Sell Item
                     </button>
                   </Link>
-                 <Link to={`/sellerproducts/${user._id}`}> <button className="cursor-pointer w-40 px-4 py-2 text-sm bg-[#1877F2] text-white rounded-md hover:bg-[#166FE5] transition">
+                 <Link to={`/sellerproducts/${user._id}`}> <button className="cursor-pointer mb-2 w-40 px-4 py-2 text-sm bg-[#1877F2] text-white rounded-md hover:bg-[#166FE5] transition">
                     Sell Status
                   </button></Link>
-                  <button className="cursor-pointer mb-2 w-40 px-4 py-2 text-sm bg-[#1877F2] text-white rounded-md hover:bg-[#166FE5] transition">
+                  {/* <button className="cursor-pointer mb-2 w-40 px-4 py-2 text-sm bg-[#1877F2] text-white rounded-md hover:bg-[#166FE5] transition">
                     Order Status
-                  </button>
+                  </button> */}
                 </div>
               ) : (
                 <div className="flex flex-col items-center space-y-3">

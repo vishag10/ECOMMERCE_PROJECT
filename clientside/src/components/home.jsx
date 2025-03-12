@@ -309,9 +309,9 @@ function Home({ useremail, setEMAIL }) {
           <a href="#" className="text-sm font-medium hover:text-gray-600">Offer sales</a>
           <a href="#" className="text-sm font-medium hover:text-gray-600">Daily damaka</a>
           <a href="#" className="text-sm font-medium hover:text-gray-600">foods</a>
-          <a href="#" className="text-sm font-medium hover:text-gray-600">Kids</a>
+          <a href="#" className="text-sm font-medium hover:text-gray-600">combo</a>
           <a href="#" className="text-sm font-medium hover:text-gray-600">Sale</a>
-          <a href="#" className="text-sm font-medium hover:text-gray-600">SNKRS</a>
+          <a href="#" className="text-sm font-medium hover:text-gray-600">    </a>
         </div>
 
         <div className="flex items-center space-x-6 relative">
