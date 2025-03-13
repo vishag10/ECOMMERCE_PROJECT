@@ -530,7 +530,7 @@ function CartPage() {
 
                       <div className="mb-6">
                         <span className="text-sm">
-                          Delivery by Mar 10 |{" "}
+                          Delivery charge{" "}
                           <span className="line-through">₹80</span>{" "}
                           <span className="text-green-600">Free</span>
                         </span>

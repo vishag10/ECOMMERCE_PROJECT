@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Camera } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
@@ -9,6 +9,27 @@ function SellItem() {
   const location = useLocation();
   const _id = location.state?._id;
   const navigate = useNavigate();
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const categoryRef = useRef(null);
+
+  const categories = [
+    "fresh produce", "fruits", "vegitables", "herbs",
+    "meat & seafood", 
+    "dairy & eggs", 
+    "bakery", "food",
+    "pantry staples", 
+    "snacks & sweets", 
+    "beverages", 
+    "frozen foods", 
+    "breakfast foods", 
+    "condiments & spices", 
+    "international foods", 
+    "organic & natural", 
+    "household & cleaning", 
+    "personal care", 
+    "baby & child"
+];
+
 
   const [product, setProduct] = useState({
     product_name: "",
@@ -20,6 +41,20 @@ function SellItem() {
     clocation: "",
     product_id: _id,
   });
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (categoryRef.current && !categoryRef.current.contains(event.target)) {
+        setShowCategoryDropdown(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [categoryRef]);
 
   const handleFileChange = async (e) => {
     const files = Array.from(e.target.files);
@@ -34,6 +69,11 @@ function SellItem() {
       fileReader.onload = () => resolve(fileReader.result);
       fileReader.onerror = (error) => reject(error);
     });
+  };
+
+  const handleCategorySelect = (category) => {
+    setProduct((prev) => ({ ...prev, category }));
+    setShowCategoryDropdown(false);
   };
 
   const handleSubmit = async (e) => {
@@ -65,7 +105,7 @@ function SellItem() {
         <ToastContainer />
         <h2 className="text-2xl font-semibold text-center mb-4">Add Product</h2>
         <form onSubmit={handleSubmit}>
-          <div className="mb-4">
+          <div className="mb-4 relative" ref={categoryRef}>
             <label className="block text-sm font-medium text-gray-700">Category</label>
             <input
               type="text"
@@ -74,7 +114,22 @@ function SellItem() {
               placeholder="Enter product category"
               onChange={(e) => setProduct((prev) => ({ ...prev, category: e.target.value }))}
               value={product.category}
+              onFocus={() => setShowCategoryDropdown(true)}
             />
+            
+            {showCategoryDropdown && (
+              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                {categories.map((category, index) => (
+                  <div 
+                    key={index} 
+                    className="p-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => handleCategorySelect(category)}
+                  >
+                    {category}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="mb-4">
@@ -132,7 +187,6 @@ function SellItem() {
             />
           </div>
 
-          
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700">Upload Images</label>
             <div className="flex items-center gap-3 mt-1">
@@ -152,7 +206,6 @@ function SellItem() {
               />
             </div>
 
-            
             <div className="mt-3 grid grid-cols-4 gap-2">
               {product.photos.map((photo, index) => (
                 <img key={index} src={photo} alt={`Preview ${index}`} className="w-20 h-20 object-cover rounded-md" />
