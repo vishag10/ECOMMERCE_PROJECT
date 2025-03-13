@@ -54,3 +54,20 @@ export async function GetAddress(req, res) {
       res.status(500).json({ msg: "Internal Server Error", error: error.message });
     }
   }
+
+  export async function OrderStatus(req, res) {
+    try {
+      const { user_id } = req.body;
+  
+      // Fetch orders for the given user_id
+      const getstatus = await orderSchema.find({ user_id });
+  
+      console.log(getstatus);
+  
+      res.status(200).json(getstatus);
+    } catch (error) {
+      console.error("Error in OrderStatus:", error);
+      res.status(500).json({ msg: "Internal Server Error", error: error.message });
+    }
+  }
+  

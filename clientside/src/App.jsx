@@ -21,6 +21,7 @@ import CartPage from './components/cart';
 import SellerProducts from './components/sellerproducts';
 import ProductEdit from './components/productEdit';
 import PageWishList from './components/wishlist';
+import Orderstatus from './components/orderstatus';
 
 
 const ThemeContext = createContext(null);
@@ -54,7 +55,9 @@ function App() {
     <Route path="/productedit/:_id" element={<ProductEdit/>} />
 
     <Route path="/wishlist" element={<PageWishList/>} />
-
+    
+    //orderstatus
+    <Route path='/orderstatus/:_id' element={<Orderstatus/>}/>
 
     //Cart
     <Route path="/cart" element={<CartPage/>} />

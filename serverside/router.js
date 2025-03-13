@@ -59,7 +59,9 @@ router.route("/addtowishlist").post(wh.addProductToWishlist);
 
 //order
 router.route("/addtoorder").post(oh.AddToorder);
-router.route("/getorderaddress").post(oh.GetAddress)
+router.route("/getorderaddress").post(oh.GetAddress);
+router.route("/orderstatus").post(oh.OrderStatus);
+
 
 // Razorpay Payment Routes
 router.route("/razorpay-create-order").post(paymentHandler.createRazorpayOrder);
