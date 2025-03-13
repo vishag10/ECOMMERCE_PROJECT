@@ -28,7 +28,7 @@ function CartPage() {
       }
 
       const res = await axios.get(`${apiPath()}/getcartcheck/${user._id}`);
-      console.log("Cart API Response:", res.data);
+      
 
       if (Array.isArray(res.data)) {
         setCartItems(res.data);
@@ -43,7 +43,7 @@ function CartPage() {
       setCartItems([]);
     }
   };
-  console.log(cartItems);
+
 
   const getProducts = async () => {
     if (cartItems.length === 0) return; 
@@ -51,7 +51,7 @@ function CartPage() {
     try {
       const productIds = cartItems.map((item) => item.product_id);
       const res = await axios.post(`${apiPath()}/getproducts`, { _id: productIds });
-      console.log("Products API Response:", res.data);
+     
 
       if (res.data && Array.isArray(res.data)) {  
         setProducts(res.data);
@@ -74,7 +74,7 @@ function CartPage() {
     }
   };
 
-  console.log(products);
+
   
   const getUser = async () => {
     const token = localStorage.getItem("token");
@@ -164,13 +164,30 @@ function CartPage() {
     );
   };
 
-  const increaseQuantity = (productId) => {
-    
-    setQuantities(prev => ({
-      ...prev,
-      [productId]: (prev[productId] || 1) + 1
-    }));
-  };
+
+  const increaseQuantity = (product) => {
+    const productId = product._id;
+
+    if (product.quantity === 0) {
+        toast.warn('⚠ Not enough stock for product');
+        return; 
+    }
+
+    setQuantities(prev => {
+        const currentQuantity = prev[productId] || 0;
+        
+        if (currentQuantity < product.quantity) {
+            return {
+                ...prev,
+                [productId]: currentQuantity + 1
+            };
+        } else {
+            toast.error(`Product reached its maximum quantity: ${product.quantity}`);
+            return prev; 
+        }
+    });
+};
+
 
   const decreaseQuantity = (productId) => {
     setQuantities(prev => ({
@@ -284,7 +301,7 @@ function CartPage() {
   
           if (verifyResponse.data.success) {
             console.log("Payment Verified:", verifyResponse.data);
-            console.log("idddd",user._id);
+          
       
       const { totalAmount } = calculatePriceDetails();
     
@@ -306,6 +323,8 @@ function CartPage() {
       const user_id=user._id;
       
       const res = await axios.post(`${apiPath()}/addtoorder`,{ user_id, orderData });
+
+      console.log("orderedData",orderData)
       
       if (res.status === 201 || res.status === 200) {
        
@@ -316,7 +335,19 @@ function CartPage() {
         setTimeout(() => {
           setShowConfirmation(false);
           window.location.reload();
-        }, 3000);
+        }, 2000);
+
+        const orderdProducts = orderData.products;
+
+        const updateQuantity = await axios.put(`${apiPath()}/updateorderquantity`, { orderdProducts });
+        
+        if (updateQuantity.status === 200) {
+          console.log("✅ Quantity updated successfully");
+        } else {
+          console.error("❌ Error updating quantity");
+        }
+        
+         
       }
           } else {
             toast.error("Payment verification failed!", { position: "top-right", autoClose: 3000, theme: "dark" });
@@ -348,13 +379,13 @@ function CartPage() {
   const handleAddress = async () => {
     try {
       const address_id = user._id;
-      console.log("Address ID:", address_id);
+      
   
       // ✅ Send address_id as JSON body
       const res = await axios.post(`${apiPath()}/getorderaddress`, { address_id });
   
       // ✅ Axios response is in res.data
-      console.log("Received Address:", res.data);
+  
       setAddress(res.data)
       
     } catch (error) {
@@ -463,7 +494,7 @@ function CartPage() {
 
                         <button
                           className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 transition"
-                          onClick={() => increaseQuantity(product._id)}
+                          onClick={() => increaseQuantity(product)}
                         >
                           <span className="text-gray-500">+</span>
                         </button>

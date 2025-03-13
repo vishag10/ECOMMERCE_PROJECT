@@ -22,7 +22,7 @@ function Product() {
   const getproduct = async () => {
     try {
       const res = await axios.get(`${apiPath()}/oneproduct/${_id}`);
-      console.log(res.data);
+   
       setProduct(res.data);
     } catch (error) {
       console.error(error);
@@ -31,7 +31,7 @@ function Product() {
 
   const getUser = async () => {
     const token = localStorage.getItem("token");
-    console.log("Token before request:", token);
+   
 
     try {
       const res = await axios.get(`${apiPath()}/homebuyerseller`, {
@@ -163,6 +163,18 @@ function Product() {
 
   const handleCart = async () => {
     try {
+
+      const product_id = cart.product_id;
+
+const productCheck = await axios.post(`${apiPath()}/getproducts`, { _id: product_id });
+
+const quantity= productCheck.data[0].quantity
+
+      if(quantity===0)
+      {
+        return toast.warn('⚠ Not enough stock for product')
+      }
+      
       const res = await axios.post(`${apiPath()}/addcart`, cart);
       toast.success(res.data.msg, { position: "top-right", autoClose: 3000, theme: "dark" });
       setIsAddedToCart(true); 

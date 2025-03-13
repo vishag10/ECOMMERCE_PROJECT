@@ -42,6 +42,7 @@ router.route("/oneproduct/:_id").get(ph.getProduct);
 router.route("/sellerproduct/:_id").get(ph.sellerProduct);
 router.route("/deleteproduct/:_id").delete(ph.deleteProduct);
 router.route("/updateproduct/:_id").put(ph.updateProduct);
+router.route('./getproductdata').get(ph.getProductData)
 
 //address
 router.route("/addaddress").post(ah.addAddress);
@@ -62,6 +63,8 @@ router.route("/addtoorder").post(oh.AddToorder);
 router.route("/getorderaddress").post(oh.GetAddress);
 router.route("/orderstatus").post(oh.OrderStatus);
 
+//order-quantity-update
+router.route('/updateorderquantity').put(ph.updateProductQuantity)
 
 // Razorpay Payment Routes
 router.route("/razorpay-create-order").post(paymentHandler.createRazorpayOrder);

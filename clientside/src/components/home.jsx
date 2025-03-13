@@ -11,6 +11,51 @@ import Footer from "./Footer";
 import MainCarousel from "./Carousel";
 import MainCarouselZero from "./carousal2";
 
+
+const SpecialDiscountSection = React.memo(({ products }) => {
+  // Filter only products that have a discount
+  const discountedProducts = products.filter(product => product.discount);
+  
+  if (discountedProducts.length === 0) return null;
+  
+  return (
+    <div className="w-4/5 mx-auto my-10">
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold text-gray-900 relative inline-block">
+          Special Discounts
+          <span className="absolute -bottom-2 left-0 w-full h-1 bg-red-500 transform scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></span>
+        </h2>
+        <p className="text-gray-500 mt-2">Limited time offers you don't want to miss!</p>
+      </div>
+      
+      <div className="flex flex-wrap justify-center gap-8">
+        {discountedProducts.slice(0, 8).map((product) => (
+          <Link to={`/product/${product._id}`} key={product._id}>
+            <div className="group relative">
+              {/* Circular product image */}
+              <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-gray-200 shadow-md hover:shadow-lg hover:border-gray-300 transition-all duration-300">
+                <img
+                  src={product.photos?.[0]} 
+                  alt={product.product_name}
+                  className="h-full w-full object-cover object-center transition-all duration-500 group-hover:scale-110"
+                  loading="lazy"
+                />
+              </div>
+              
+              {/* Discount badge positioned at bottom right of circle */}
+              <div className="absolute -bottom-2 -right-2 bg-red-500 text-white font-bold text-sm w-12 h-12 flex items-center justify-center rounded-full shadow-lg">
+                {product.discount}%
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+});
+
+
+
 const ProductCard = React.memo(({ product }) => {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -47,6 +92,9 @@ const ProductCard = React.memo(({ product }) => {
       </div>
     </Link>
   );
+}, (prevProps, nextProps) => {
+  // Only re-render if the product ID changes
+  return prevProps.product._id === nextProps.product._id;
 });
 
 <MainCarousel/>
@@ -102,6 +150,10 @@ const CategoryCarousel = React.memo(({ title, products }) => {
       </div>
     </div>
   );
+}, (prevProps, nextProps) => {
+  // Only re-render if title or products array changes
+  return prevProps.title === nextProps.title && 
+         prevProps.products.length === nextProps.products.length;
 });
 
 function Home({ useremail, setEMAIL }) {
@@ -228,6 +280,19 @@ function Home({ useremail, setEMAIL }) {
     }
   }, [searchQuery]);
 
+
+  const handleUnavailable=async()=>{
+    toast.warn("currently unavailable", {
+      position: "top-right",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      theme: "dark",
+    });
+  }
+
   return (
     <>
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-4 bg-white border-b shadow-sm transition-all duration-300">
@@ -237,11 +302,11 @@ function Home({ useremail, setEMAIL }) {
         </div>
 
         <div className="hidden lg:flex items-center space-x-8">
-          <a href="#" className="text-sm font-medium hover:text-gray-600">Offer sales</a>
-          <a href="#" className="text-sm font-medium hover:text-gray-600">Daily damaka</a>
-          <a href="#" className="text-sm font-medium hover:text-gray-600">foods</a>
-          <a href="#" className="text-sm font-medium hover:text-gray-600">combo</a>
-          <a href="#" className="text-sm font-medium hover:text-gray-600">Sale</a>
+         <button onClick={handleUnavailable}><a href="#" className="text-sm font-medium hover:text-gray-600">Offer sales</a></button> 
+          <button onClick={handleUnavailable}><a href="#" className="text-sm font-medium hover:text-gray-600">Daily damaka</a></button>
+          <button onClick={handleUnavailable}><a href="#" className="text-sm font-medium hover:text-gray-600">foods</a></button>
+          <button onClick={handleUnavailable}><a href="#" className="text-sm font-medium hover:text-gray-600">combo</a></button>
+          <button onClick={handleUnavailable}><a href="#" className="text-sm font-medium hover:text-gray-600">Sale</a></button>
           <a href="#" className="text-sm font-medium hover:text-gray-600">    </a>
         </div>
 
@@ -428,6 +493,7 @@ function Home({ useremail, setEMAIL }) {
         <div className="mt-10 mb-10">
           <MainCarousel />
         </div>
+        <SpecialDiscountSection products={products} />
         <div className="w-4/5 mx-auto space-y-10">
 
          
