@@ -1,5 +1,6 @@
 import productSchema from "../models/product.model.js";
 import mongoose from "mongoose";
+import userSchema from "../models/buyerOrSeller.model.js";
 
 export async function addProduct(req, res) {
   const {
@@ -53,9 +54,16 @@ export async function getProducts(req, res) {
       return res.status(400).send({ msg: "user_id is required" });
     }
 
-    // Fetch products where product_id is NOT equal to user_id
+    // Step 1: Find all user IDs that are blocked
+    const blockedUsers = await userSchema.find({ block: true }, { _id: 1 });
+    const blockedUserIds = blockedUsers.map(user => user._id.toString());
+
+    
     const products = await productSchema.find({
-      product_id: { $ne: user_id },
+      product_id: { 
+        $ne: user_id,
+        $nin: blockedUserIds 
+      }
     });
 
     res.status(200).send(products);
