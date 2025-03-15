@@ -23,6 +23,7 @@ import ProductEdit from './components/productEdit';
 import PageWishList from './components/wishlist';
 import Orderstatus from './components/orderstatus';
 import Foods from './components/foods';
+import Offersale from './components/offersale';
 
 
 const ThemeContext = createContext(null);
@@ -64,6 +65,7 @@ function App() {
     <Route path="/cart" element={<CartPage/>} />
 
     <Route path="/food" element={<Foods/>} />
+    <Route path="/offer" element={<Offersale/>} />
    
     
      </Routes>

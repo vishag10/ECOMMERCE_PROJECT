@@ -1,16 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ToastContainer, toast } from 'react-toastify';
 import axios from "axios";
 import apiPath from "./path/apipath";
 
 function Address() {
-    
     const location = useLocation();
     const _id = location.state?._id;
     const navigate = useNavigate();
-   console.log(_id);
-   
+    
     const [address, setAdress] = useState({
         line: "",
         district: "",
@@ -18,28 +16,90 @@ function Address() {
         phone: "",
         address_id: _id 
     });
+    
+    const [errors, setErrors] = useState({
+        line: "",
+        district: "",
+        pincode: "",
+        phone: ""
+    });
 
+    const validateForm = () => {
+        let isValid = true;
+        const newErrors = {
+            line: "",
+            district: "",
+            pincode: "",
+            phone: ""
+        };
+        
+        // Validate line
+        if (!address.line.trim()) {
+            newErrors.line = "Address line is required";
+            isValid = false;
+        } else if (address.line.trim().length < 5) {
+            newErrors.line = "Address line must be at least 5 characters";
+            isValid = false;
+        }
+        
+        // Validate district
+        if (!address.district.trim()) {
+            newErrors.district = "District is required";
+            isValid = false;
+        }
+        
+        // Validate pincode
+        if (!address.pincode.trim()) {
+            newErrors.pincode = "Pincode is required";
+            isValid = false;
+        } else if (!/^\d{6}$/.test(address.pincode)) {
+            newErrors.pincode = "Pincode must be a 6-digit number";
+            isValid = false;
+        }
+        
+        // Validate phone
+        if (!address.phone.trim()) {
+            newErrors.phone = "Phone number is required";
+            isValid = false;
+        } else if (!/^\d{10}$/.test(address.phone)) {
+            newErrors.phone = "Phone number must be 10 digits";
+            isValid = false;
+        }
+        
+        setErrors(newErrors);
+        return isValid;
+    };
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setAdress(prev => ({ ...prev, [name]: value }));
+        
+        // Clear the error for this field when user starts typing
+        if (errors[name]) {
+            setErrors(prev => ({ ...prev, [name]: "" }));
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-      
-        if (!address.line || !address.district || !address.pincode || !address.phone) {
-          toast.error("All fields are required!", { theme: "dark" });
-          return;
+        
+        if (!validateForm()) {
+            toast.error("Please fix the errors in the form", { theme: "dark" });
+            return;
         }
       
         try {
-          const res = await axios.post(`${apiPath()}/addaddress`, address);
-          if (res.status === 201) {
-            toast.success(res.data.msg, { theme: "dark" });
-            setAdress({ line: "", district: "", pincode: "", phone: ""});
-            setTimeout(() => navigate("/profile"), 3000);
-          }
+            const res = await axios.post(`${apiPath()}/addaddress`, address);
+            if (res.status === 201) {
+                toast.success(res.data.msg, { theme: "dark" });
+                setAdress({ line: "", district: "", pincode: "", phone: "", address_id: _id });
+                setTimeout(() => navigate("/profile"), 3000);
+            }
         } catch (error) {
-          console.log("Error submitting address:", error);
-          toast.error("Failed to add address", { theme: "dark" });
+            console.log("Error submitting address:", error);
+            toast.error("Failed to add address", { theme: "dark" });
         }
-      };
+    };
 
     return (
         <>
@@ -54,10 +114,11 @@ function Address() {
                                 type="text"
                                 placeholder="Enter address line"
                                 name="line"
-                                onChange={(e) => setAdress(prev => ({ ...prev, line: e.target.value }))}
+                                onChange={handleChange}
                                 value={address.line}
-                                className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none ${errors.line ? 'border-red-500' : ''}`}
                             />
+                            {errors.line && <p className="text-red-500 text-xs mt-1">{errors.line}</p>}
                         </div>
                         <div>
                             <label className="block text-gray-700 text-sm font-medium">District</label>
@@ -65,10 +126,11 @@ function Address() {
                                 type="text"
                                 placeholder="Enter district"
                                 name="district"
-                                onChange={(e) => setAdress(prev => ({ ...prev, district: e.target.value }))}
+                                onChange={handleChange}
                                 value={address.district}
-                                className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none ${errors.district ? 'border-red-500' : ''}`}
                             />
+                            {errors.district && <p className="text-red-500 text-xs mt-1">{errors.district}</p>}
                         </div>
                         <div>
                             <label className="block text-gray-700 text-sm font-medium">Pincode</label>
@@ -76,10 +138,11 @@ function Address() {
                                 type="text"
                                 placeholder="Enter pincode"
                                 name="pincode"
-                                onChange={(e) => setAdress(prev => ({ ...prev, pincode: e.target.value }))}
+                                onChange={handleChange}
                                 value={address.pincode}
-                                className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none ${errors.pincode ? 'border-red-500' : ''}`}
                             />
+                            {errors.pincode && <p className="text-red-500 text-xs mt-1">{errors.pincode}</p>}
                         </div>
                         <div>
                             <label className="block text-gray-700 text-sm font-medium">Phone</label>
@@ -87,10 +150,11 @@ function Address() {
                                 type="text"
                                 placeholder="Enter phone number"
                                 name="phone"
-                                onChange={(e) => setAdress(prev => ({ ...prev, phone: e.target.value }))}
+                                onChange={handleChange}
                                 value={address.phone}
-                                className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none ${errors.phone ? 'border-red-500' : ''}`}
                             />
+                            {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
                         </div>
                         <button
                             type="submit"

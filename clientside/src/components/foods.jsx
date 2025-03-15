@@ -3,32 +3,45 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import apiPath from './path/apipath';
+import apiPath from "./path/apipath";
 import logo from "../assets/prada-logo-svgrepo-com.svg";
-import { Search, ShoppingBag } from 'lucide-react'; // Using lucide-react icons
+import { Search, ShoppingBag } from 'lucide-react';
 
 export default function Foods() {
   const navigate = useNavigate();
-  const [user, setUser] = useState({ email: "", username: "", user_id: "" });
+  const [user, setUser] = useState({ email: "", username: "", accounttype: "", _id: "" });
   const [products, setProducts] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [hoveredProductId, setHoveredProductId] = useState(null);
+  const [loading, setLoading] = useState(true);
 
+ 
   const getUser = useCallback(async () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      setTimeout(() => navigate("/buyerorsellerlogin"), 3000);
+      console.log("No token found");
       return;
     }
+
     try {
       const res = await axios.get(`${apiPath()}/homebuyerseller`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
+
       if (res.status === 200) {
-        setUser({ email: res.data.email, username: res.data.username, user_id: res.data._id });
+        console.log("User Data:", res.data);
+        setUser({
+          email: res.data.email,
+          username: res.data.username,
+          accounttype: res.data.accounttype,
+          _id: res.data._id,
+        });
       }
     } catch (error) {
+      console.error("Error fetching user:", error.response ? error.response.data : error);
       if (error.response?.data?.msg === "Login time expired please login again") {
         localStorage.removeItem("token");
         setTimeout(() => navigate("/buyerorsellerlogin"), 3000);
@@ -36,25 +49,44 @@ export default function Foods() {
     }
   }, [navigate]);
 
+  
   const getProducts = useCallback(async () => {
+    setLoading(true);
     try {
-      const res = await axios.get(`${apiPath()}/getproducts`);
+      
+      const res = await axios.post(`${apiPath()}/getproduct`, { user_id: user._id || "guest" });
+
+      
       if (res.status === 200) {
-        // Filter for only food category items
-        const foodProducts = res.data.filter(product => product.category === "food");
+        console.log("All products:", res.data);
+        
+        
+        const foodProducts = res.data.filter(product => 
+          product.category === "food"
+        );
+        
+        console.log("Food products:", foodProducts);
         setProducts(foodProducts);
       }
     } catch (error) {
       console.error("Error fetching products:", error);
-      toast.error("Failed to load products");
+      toast.error("Failed to load food products");
+    } finally {
+      setLoading(false);
     }
-  }, []);
+  }, [user._id]);
 
+  
   useEffect(() => {
     getUser();
-    getProducts();
-  }, [getUser, getProducts]);
+  }, [getUser]);
 
+  
+  useEffect(() => {
+    getProducts();
+  }, [getProducts]);
+
+  
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("useremail");
@@ -66,25 +98,34 @@ export default function Foods() {
       closeOnClick: true,
       pauseOnHover: true,
       draggable: true,
-      theme: "dark",
+      theme: "light",
     });
 
-    setUser({ email: "", username: "", user_id: "" });
+    setUser({ email: "", username: "", accounttype: "", _id: "" });
     setTimeout(() => navigate("/buyerorsellerlogin"), 3000);
   };
 
+  
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
   };
 
+ 
   const filteredProducts = products.filter(product => 
-    product.product_name.toLowerCase().includes(searchQuery.toLowerCase())
+    product.product_name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  
+  const calculateOfferPrice = (originalPrice, discountPercentage) => {
+    if (!originalPrice || !discountPercentage) return originalPrice;
+    const discountAmount = (originalPrice * discountPercentage) / 100;
+    return (originalPrice - discountAmount).toFixed(2);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-amber-50">
+    <div className="min-h-screen bg-white">
       <ToastContainer />
-      {/* Navigation Bar */}
+      
       <nav className="sticky top-0 z-10 flex items-center justify-between px-4 md:px-8 py-4 bg-white border-b shadow-sm">
         <Link to={"/"}>
           <div className="flex items-center">
@@ -107,22 +148,22 @@ export default function Foods() {
           </div>
           
           <Link to={"/cart"}>
-            <ShoppingBag className="w-5 h-5 md:w-6 md:h-6 cursor-pointer hover:text-amber-600 transition-colors" />
+            <ShoppingBag className="w-5 h-5 md:w-6 md:h-6 cursor-pointer hover:text-gray-600 transition-colors" />
           </Link>
 
           {user.username ? (
             <div className="relative">
               <button
-                className="cursor-pointer w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-white font-semibold rounded-full bg-amber-600 hover:bg-amber-700 focus:outline-none transition-colors"
+                className="cursor-pointer w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-white font-semibold rounded-full bg-gray-700 hover:bg-gray-800 focus:outline-none transition-colors"
                 onClick={() => setDropdownOpen(!dropdownOpen)}
               >
                 {user.username.charAt(0).toUpperCase()}
               </button>
 
               {dropdownOpen && (
-                <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg">
+                <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg z-20">
                   <button
-                    className="cursor-pointer w-full text-left px-4 py-2 text-sm hover:bg-gray-200 rounded-lg"
+                    className="cursor-pointer w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded-lg"
                     onClick={handleLogout}
                   >
                     Logout
@@ -133,7 +174,7 @@ export default function Foods() {
           ) : (
             <Link
               to={"/buyerorsellerlogin"}
-              className="bg-amber-600 text-white px-4 md:px-6 py-2 rounded-full text-sm font-medium hover:bg-amber-700 transition-colors"
+              className="bg-gray-700 text-white px-4 md:px-6 py-2 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors"
             >
               Login
             </Link>
@@ -141,17 +182,21 @@ export default function Foods() {
         </div>
       </nav>
 
-      {/* Header Section */}
-      <div className="bg-amber-100 py-6 md:py-12 px-4 md:px-8">
+      
+      <div className=" py-6 md:py-12 px-4 md:px-8">
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-2xl md:text-4xl font-bold text-amber-800">Delicious Food Selections</h1>
-          <p className="mt-2 md:mt-4 text-sm md:text-base text-amber-700">Explore our curated collection of fresh and authentic food items</p>
+          <h1 className="text-2xl md:text-4xl font-bold text-gray-800">Delicious Food Selections</h1>
+          <p className="mt-2 md:mt-4 text-sm md:text-base text-gray-600">Explore our curated collection of fresh and authentic food items</p>
         </div>
       </div>
 
-      {/* Products Grid */}
+      
       <div className="max-w-6xl mx-auto px-4 py-8 md:py-12">
-        {filteredProducts.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-12">
+            <p className="text-lg text-gray-600">Loading products...</p>
+          </div>
+        ) : filteredProducts.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-lg text-gray-600">No food products found</p>
           </div>
@@ -160,7 +205,7 @@ export default function Foods() {
             {filteredProducts.map((product) => (
               <Link to={`/product/${product._id}`} key={product._id}>
                 <div
-                  className="group bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 h-full flex flex-col"
+                  className="group bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 h-full flex flex-col border border-gray-100"
                   onMouseEnter={() => setHoveredProductId(product._id)}
                   onMouseLeave={() => setHoveredProductId(null)}
                 >
@@ -183,18 +228,31 @@ export default function Foods() {
                   <div className="p-4 flex-grow flex flex-col justify-between">
                     <div>
                       <div className="flex justify-between items-start mb-2">
-                        <h3 className="text-lg font-medium text-gray-900 group-hover:text-amber-600 transition-colors">
+                        <h3 className="text-lg font-medium text-gray-900 group-hover:text-gray-600 transition-colors">
                           {product.product_name || "Unnamed Product"}
                         </h3>
-                        <span className="text-lg font-bold text-amber-600">
-                          ₹{product.price || "N/A"}
-                        </span>
+                        <div className="text-right">
+                          {product.discount ? (
+                            <>
+                              <span className="text-lg font-bold text-green-600">
+                                ₹{calculateOfferPrice(product.price, product.discount)}
+                              </span>
+                              <br />
+                              <span className="text-sm text-gray-500 line-through">
+                                ₹{product.price || "N/A"}
+                              </span>
+                            </>
+                          ) : (
+                            <span className="text-lg font-bold text-gray-700">
+                              ₹{product.price || "N/A"}
+                            </span>
+                          )}
+                        </div>
                       </div>
                       
                       <div className="flex items-center text-sm text-gray-500 mb-3">
                         <span>{product.cname || "Unknown Vendor"}</span>
-                        <span className="mx-2">•</span>
-                        <span>{product.clocation || "Unknown Location"}</span>
+                        
                       </div>
                       
                       {product.quantity && product.quantity < 20 ? (
@@ -204,9 +262,7 @@ export default function Foods() {
                       ) : null}
                     </div>
                     
-                    <button className="mt-3 w-full bg-amber-100 hover:bg-amber-200 text-amber-800 font-medium py-2 rounded-lg transition-colors text-sm">
-                      Add to Cart
-                    </button>
+                    
                   </div>
                 </div>
               </Link>
@@ -215,8 +271,8 @@ export default function Foods() {
         )}
       </div>
 
-      {/* Footer */}
-      <footer className="bg-amber-800 text-amber-100 py-8 mt-auto">
+    
+      <footer className="bg-gray-800 text-gray-100 py-8 mt-auto">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
           <div className="text-center">
             <p className="text-sm">© {new Date().getFullYear()} Food Category Store. All rights reserved.</p>
