@@ -50,41 +50,41 @@ function Home({ useremail }) {
     }
   }, [navigate]);
 
-  const getProducts = useCallback(async () => {
-    if (!user.user_id) return;
-    try {
-      const res = await axios.post(`${apiPath()}/getproduct`, { user_id: user.user_id });
-      if (res.status === 200) {
-        console.log("getproducts",res.data)
-        setProducts(res.data);
-        setCategories([...new Set(res.data.map((product) => product.category))]);
+    const getProducts = useCallback(async () => {
+      if (!user.user_id) return;
+      try {
+        const res = await axios.post(`${apiPath()}/getproduct`, { user_id: user.user_id });
+        if (res.status === 200) {
+          console.log("getproducts",res.data)
+          setProducts(res.data);
+          setCategories([...new Set(res.data.map((product) => product.category))]);
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
       }
-    } catch (error) {
-      console.error("Error fetching products:", error);
-    }
-  }, [user.user_id]);
+    }, [user.user_id]);
 
 
-  useEffect(() => {
-    getUser();
-  }, []);
-  
-  useEffect(() => {
-    if (user.user_id) {
-      getProducts();
-    }
-  }, [user.user_id]);
-  
+    useEffect(() => {
+      getUser();
+    }, []);
+    
+    useEffect(() => {
+      if (user.user_id) {
+        getProducts();
+      }
+    }, [user.user_id]);
+    
 
 
-  const applyFilters = useCallback((productsToFilter) => {
-    return productsToFilter.filter((product) => {
-      const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(product.category);
-      const matchesPrice = (!minPrice || product.price >= Number(minPrice)) && (!maxPrice || product.price <= Number(maxPrice));
-      const matchesSearch = !searchQuery || product.product_name.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesCategory && matchesPrice && matchesSearch;
-    });
-  }, [selectedCategories, minPrice, maxPrice, searchQuery]);
+    const applyFilters = useCallback((productsToFilter) => {
+      return productsToFilter.filter((product) => {
+        const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(product.category);
+        const matchesPrice = (!minPrice || product.price >= Number(minPrice)) && (!maxPrice || product.price <= Number(maxPrice));
+        const matchesSearch = !searchQuery || product.product_name.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesCategory && matchesPrice && matchesSearch;
+      });
+    }, [selectedCategories, minPrice, maxPrice, searchQuery]);
 
   
 

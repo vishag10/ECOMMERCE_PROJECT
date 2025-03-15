@@ -22,6 +22,7 @@ import SellerProducts from './components/sellerproducts';
 import ProductEdit from './components/productEdit';
 import PageWishList from './components/wishlist';
 import Orderstatus from './components/orderstatus';
+import Foods from './components/foods';
 
 
 const ThemeContext = createContext(null);
@@ -62,6 +63,8 @@ function App() {
     //Cart
     <Route path="/cart" element={<CartPage/>} />
 
+    <Route path="/food" element={<Foods/>} />
+   
     
      </Routes>
   </BrowserRouter>

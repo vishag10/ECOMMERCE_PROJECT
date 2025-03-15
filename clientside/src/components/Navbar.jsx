@@ -25,18 +25,11 @@ const Navbar = ({
         <Link to={"/offer"} className="text-sm font-medium hover:text-gray-600">
           Offer sales
         </Link>
-        <Link to={"/daily"} className="text-sm font-medium hover:text-gray-600">
-          Daily damaka
-        </Link>
+        
         <Link to={"/food"} className="text-sm font-medium hover:text-gray-600">
           Foods
         </Link>
-        <Link to={"/combo"} className="text-sm font-medium hover:text-gray-600">
-          Combo
-        </Link>
-        <Link to={"/sale"} className="text-sm font-medium hover:text-gray-600">
-          Sale
-        </Link>
+        
       </div>
       <div className="flex items-center space-x-6 relative">
         <div className="hidden md:flex items-center bg-gray-100 rounded-full">

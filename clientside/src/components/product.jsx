@@ -448,10 +448,10 @@ const quantity= productCheck.data[0].quantity
                       Add to Cart
                     </button>
                   )}
-                  <button className="w-full bg-gray-900 text-white py-3 px-6 rounded-xl hover:bg-gray-800 transition-colors text-lg font-medium shadow-md"
+                  {/* <button className="w-full bg-gray-900 text-white py-3 px-6 rounded-xl hover:bg-gray-800 transition-colors text-lg font-medium shadow-md"
                   onClick={handleCart}>
                     Buy Now
-                  </button>
+                  </button> */}
                 </div>
                 
                 {/* Shipping and return info */}
