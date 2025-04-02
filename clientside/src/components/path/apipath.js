@@ -1,5 +1,5 @@
 export default function apiPath(){
     return(
-        "http://localhost:3000/api"
+        "http://13.53.133.75/api"
     )
 }
