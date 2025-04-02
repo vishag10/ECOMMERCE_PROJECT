@@ -1,33 +1,29 @@
-import express from 'express';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import env from "dotenv";
+import express, { json } from 'express';
+import env from "dotenv"
 import connection from './connection.js';
 import router from './router.js';
-import cors from "cors";
+import path from "path"
+import { fileURLToPath } from 'url';
+import fs from 'fs';
+import cors from "cors"
+env.config()
 
-env.config();
+// const __filename = fileURLToPath(import.meta.url);
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// const __dirname = path.dirname(__filename);
+
 
 const app = express();
-app.use(cors());
+app.use(cors())
+app.use(express.static(path.join('../clientside')))
+// app.get("*",(req,res)=>{
+//     res.status(200).sendFile(path.join(__dirname,"../frontend/dist/index.html"))
+// })
+app.use(express.json({limit:"100mb"}))
+app.use("/api",router)
 
-// API routes should come first - process JSON data
-app.use(express.json({ limit: "100mb" }));
-app.use("/api", router);
-
-// Serve static files from the frontend's "dist" folder
-app.use(express.static(path.join(__dirname, 'dist')));
-
-// AFTER API routes, handle all other routes and serve the React app
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname,"dist" ,'index.html'));
-});
-
-connection().then(() => {
-    app.listen(process.env.PORT, () => {
-        console.log(`Server started at http://localhost:${process.env.PORT}`);
-    });
-});
+connection().then(()=>{
+    app.listen(process.env.PORT,()=>{
+        console.log(`server started on port http://localhost:${process.env.PORT}`)
+    })
+})
