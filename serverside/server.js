@@ -19,11 +19,11 @@ app.use(express.json({ limit: "100mb" }));
 app.use("/api", router);
 
 // Serve static files from the frontend's "dist" folder
-app.use(express.static(path.join(__dirname, '../clientside/dist')));
+app.use(express.static(path.join(__dirname, 'dist')));
 
 // AFTER API routes, handle all other routes and serve the React app
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../clientside/dist/index.html'));
+    res.sendFile(path.join(__dirname,"dist" ,'index.html'));
 });
 
 connection().then(() => {
